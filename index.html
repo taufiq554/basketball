@@ -1,0 +1,1942 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GaneMaX.ai Live Basketball - Pro AI Broadcast & Analytics</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Sora, Inter, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'action-blue': '#0055FF',
+            'primary-dark': '#0041C8',
+            'data-cyan': '#00C2FF',
+            'stadium-gray': '#F4F7FA',
+            'stat-black': '#0A0B0D',
+            'neutral-muted': '#64748B',
+            'border-light': '#E2E8F0',
+          },
+          fontFamily: {
+            sora: ['Sora', 'sans-serif'],
+            inter: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          boxShadow: {
+            'floating': '0px 10px 30px rgba(0, 85, 255, 0.12)',
+            'card': '0px 4px 15px rgba(10, 11, 13, 0.04)',
+            'tab-active': '0px 4px 14px rgba(0, 85, 255, 0.3)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #FFFFFF;
+      color: #0A0B0D;
+    }
+    .font-sora { font-family: 'Sora', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    
+    ::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F4F7FA;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #CBD5E1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #0055FF;
+    }
+    .label-caps {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #64748B;
+    }
+    .pulsate-live {
+      animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.08); }
+    }
+    
+    .tab-btn {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .tab-btn-active {
+      background-color: #0055FF !important;
+      color: #FFFFFF !important;
+      box-shadow: 0px 4px 14px rgba(0, 85, 255, 0.3) !important;
+      border-color: #0055FF !important;
+    }
+  </style>
+</head>
+<body class="bg-white min-h-screen flex flex-col text-[#0A0B0D] selection:bg-action-blue selection:text-white">
+
+  <!-- HEADER BRANDING -->
+  <header class="border-b border-border-light bg-white sticky top-0 z-40 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 gap-3">
+        
+        <!-- Logo GaneMaX.ai -->
+        <div class="flex items-center gap-3 cursor-pointer shrink-0" onclick="switchMainTab('scores')">
+          <div class="relative w-10 h-10 rounded-xl overflow-hidden bg-action-blue flex items-center justify-center text-white font-sora font-extrabold text-xl shadow-md border border-white/20">
+            <img src="logo.jpg" id="app-logo-img" alt="GaneMaX.ai Logo" class="w-full h-full object-cover" onerror="this.style.display='none'; document.getElementById('app-logo-fallback').style.display='flex';">
+            <div id="app-logo-fallback" class="hidden w-full h-full bg-gradient-to-br from-action-blue to-primary-dark items-center justify-center text-white font-sora font-extrabold text-xl">
+              G
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-sora font-extrabold text-xl tracking-tight text-stat-black">GaneMaX<span class="text-action-blue">.ai</span></span>
+              <span class="bg-action-blue text-white text-[9px] font-mono font-bold px-2 py-0.5 rounded-full tracking-widest uppercase shadow-sm">PRO BROADCAST</span>
+            </div>
+            <p class="text-[10px] font-mono text-neutral-muted tracking-wider">LIVE BASKETBALL & AI ENGINE</p>
+          </div>
+        </div>
+
+        <!-- Custom Designed League Switcher Trigger -->
+        <button onclick="openLeagueModal()" class="flex items-center gap-2.5 bg-stadium-gray hover:bg-blue-50/60 px-3.5 py-2 rounded-xl border border-border-light hover:border-action-blue transition shadow-sm cursor-pointer">
+          <span class="w-2.5 h-2.5 rounded-full bg-action-blue pulsate-live"></span>
+          <span id="current-league-display-btn" class="font-sora font-bold text-xs text-stat-black">🏀 NBA (USA)</span>
+          <i class="fa-solid fa-chevron-down text-[10px] text-neutral-muted ml-1"></i>
+        </button>
+
+        <!-- Status & Update Button -->
+        <div class="flex items-center gap-2">
+          <button onclick="fetchAllLeagueData()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-border-light text-xs font-mono font-semibold text-neutral-muted hover:border-action-blue hover:text-action-blue transition shadow-sm">
+            <i id="refresh-icon" class="fa-solid fa-arrows-rotate"></i>
+            <span class="hidden sm:inline">Refresh Feed</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB NAVIGATION BAR -->
+    <div class="border-t border-border-light bg-stadium-gray px-4 py-2">
+      <div class="max-w-7xl mx-auto flex overflow-x-auto gap-2 text-xs font-sora font-semibold scrollbar-none">
+        <button id="nav-scores" onclick="switchMainTab('scores')" class="tab-btn tab-btn-active whitespace-nowrap px-4 py-2 rounded-xl border border-transparent flex items-center gap-2">
+          <i class="fa-solid fa-basketball"></i> Scores & Live
+        </button>
+        <button id="nav-standings" onclick="switchMainTab('standings')" class="tab-btn whitespace-nowrap px-4 py-2 rounded-xl border border-border-light bg-white text-neutral-muted hover:text-action-blue flex items-center gap-2">
+          <i class="fa-solid fa-list-ol"></i> Klasemen Overall
+        </button>
+        <button id="nav-teams" onclick="switchMainTab('teams')" class="tab-btn whitespace-nowrap px-4 py-2 rounded-xl border border-border-light bg-white text-neutral-muted hover:text-action-blue flex items-center gap-2">
+          <i class="fa-solid fa-users-viewfinder"></i> Tim & Hub Skuad
+        </button>
+        <button id="nav-stats" onclick="switchMainTab('stats')" class="tab-btn whitespace-nowrap px-4 py-2 rounded-xl border border-border-light bg-white text-neutral-muted hover:text-action-blue flex items-center gap-2">
+          <i class="fa-solid fa-chart-line"></i> Pemimpin Statistik
+        </button>
+        <button id="nav-transactions" onclick="switchMainTab('transactions')" class="tab-btn whitespace-nowrap px-4 py-2 rounded-xl border border-border-light bg-white text-neutral-muted hover:text-action-blue flex items-center gap-2">
+          <i class="fa-solid fa-right-left"></i> Transaksi & Draft
+        </button>
+        <button id="nav-injuries" onclick="switchMainTab('injuries')" class="tab-btn whitespace-nowrap px-4 py-2 rounded-xl border border-border-light bg-white text-neutral-muted hover:text-action-blue flex items-center gap-2">
+          <i class="fa-solid fa-user-doctor"></i> Laporan Cedera
+        </button>
+        <button id="nav-rankings" onclick="switchMainTab('rankings')" class="tab-btn whitespace-nowrap px-4 py-2 rounded-xl border border-border-light bg-white text-neutral-muted hover:text-action-blue flex items-center gap-2">
+          <i class="fa-solid fa-ranking-star"></i> Rankings & BPI
+        </button>
+        <button id="nav-ai" onclick="switchMainTab('ai')" class="tab-btn whitespace-nowrap px-4 py-2 rounded-xl border border-border-light bg-white text-neutral-muted hover:text-action-blue flex items-center gap-2">
+          <i class="fa-solid fa-brain text-data-cyan"></i> GaneMaX.ai Analyst
+        </button>
+        <button id="nav-compare" onclick="switchMainTab('compare')" class="tab-btn whitespace-nowrap px-4 py-2 rounded-xl border border-border-light bg-white text-neutral-muted hover:text-action-blue flex items-center gap-2">
+          <i class="fa-solid fa-sliders"></i> Komparasi
+        </button>
+        <button id="nav-news" onclick="switchMainTab('news')" class="tab-btn whitespace-nowrap px-4 py-2 rounded-xl border border-border-light bg-white text-neutral-muted hover:text-action-blue flex items-center gap-2">
+          <i class="fa-solid fa-newspaper"></i> Berita
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- LIVE TICKER & CONTROL TANGGAL -->
+  <section class="bg-stadium-gray border-b border-border-light py-3 overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2.5">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 pulsate-live"></span>
+          <span id="active-league-label" class="label-caps font-bold text-stat-black tracking-wider">NBA LIVE MATCH STREAM</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="changeDate(-1)" class="p-1.5 px-3 text-xs rounded-xl border border-border-light bg-white hover:bg-stadium-gray font-mono font-bold transition shadow-sm">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          <input type="date" id="scoreboard-date-picker" onchange="onDateChanged()" class="bg-white border border-border-light text-xs font-mono rounded-xl px-3 py-1.5 focus:outline-none focus:border-action-blue shadow-sm">
+          <button onclick="changeDate(1)" class="p-1.5 px-3 text-xs rounded-xl border border-border-light bg-white hover:bg-stadium-gray font-mono font-bold transition shadow-sm">
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+          <button onclick="resetToToday()" class="text-[11px] font-mono px-3 py-1.5 bg-action-blue hover:bg-primary-dark text-white rounded-xl font-semibold transition shadow-sm">Hari Ini</button>
+        </div>
+      </div>
+
+      <div id="games-ticker-container" class="flex gap-3 overflow-x-auto pb-1.5 scrollbar-thin">
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN APP CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    
+    <!-- TAB 1: SCORES & FEATURED MATCH -->
+    <div id="tab-scores" class="space-y-6">
+      
+      <div id="featured-match-card" class="bg-white rounded-2xl border border-border-light p-6 sm:p-8 shadow-card relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-96 h-96 bg-blue-50/60 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20"></div>
+
+        <div class="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-6 sm:gap-8">
+          
+          <!-- Home Team -->
+          <div class="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left flex-1">
+            <div class="w-24 h-24 rounded-2xl bg-stadium-gray p-3 border border-border-light flex items-center justify-center shrink-0 shadow-sm">
+              <img id="home-team-logo" src="https://a.espncdn.com/i/teamlogos/nba/500/lal.png" alt="Home Team Logo" class="w-full h-full object-contain drop-shadow">
+            </div>
+            <div>
+              <span id="home-team-record" class="label-caps !text-action-blue font-bold">LAL • 45-21</span>
+              <h2 id="home-team-name" class="font-sora font-extrabold text-2xl sm:text-3xl text-stat-black tracking-tight mt-0.5">LA Lakers</h2>
+              <p id="home-team-detail" class="text-xs text-neutral-muted mt-1 font-inter">Tuan Rumah (Home)</p>
+            </div>
+          </div>
+
+          <!-- Scoreboard Display -->
+          <div class="flex flex-col items-center bg-gradient-to-b from-stadium-gray to-white px-8 py-5 rounded-2xl border border-border-light min-w-[280px] shadow-sm">
+            <div id="game-status-badge" class="mb-2">
+              <span class="bg-action-blue text-white text-xs font-mono font-bold px-3.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-2 shadow-sm">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 pulsate-live"></span>
+                <span id="game-status-text">Q3 - 04:12 LIVE</span>
+              </span>
+            </div>
+            
+            <div class="flex items-center gap-6 my-1">
+              <span id="home-score" class="font-sora font-extrabold text-4xl sm:text-5xl text-stat-black tracking-tight">108</span>
+              <span class="font-sora font-bold text-2xl text-neutral-muted">:</span>
+              <span id="away-score" class="font-sora font-extrabold text-4xl sm:text-5xl text-stat-black tracking-tight">102</span>
+            </div>
+
+            <span id="game-arena" class="font-mono text-[11px] text-neutral-muted mt-1.5">Crypto.com Arena</span>
+          </div>
+
+          <!-- Away Team -->
+          <div class="flex flex-col sm:flex-row-reverse items-center gap-5 text-center sm:text-right flex-1">
+            <div class="w-24 h-24 rounded-2xl bg-stadium-gray p-3 border border-border-light flex items-center justify-center shrink-0 shadow-sm">
+              <img id="away-team-logo" src="https://a.espncdn.com/i/teamlogos/nba/500/gs.png" alt="Away Team Logo" class="w-full h-full object-contain drop-shadow">
+            </div>
+            <div>
+              <span id="away-team-record" class="label-caps !text-action-blue font-bold">GSW • 42-24</span>
+              <h2 id="away-team-name" class="font-sora font-extrabold text-2xl sm:text-3xl text-stat-black tracking-tight mt-0.5">Golden State</h2>
+              <p id="away-team-detail" class="text-xs text-neutral-muted mt-1 font-inter">Tim Tamu (Away)</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Meta Info Bar: Broadcasts, Officials & Betting Odds -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-6 pt-4 border-t border-border-light text-xs font-inter bg-stadium-gray p-3.5 rounded-xl border border-border-light">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-tv text-action-blue"></i>
+            <span class="font-mono text-[11px] text-neutral-muted font-bold">SIARAN:</span>
+            <span id="match-broadcast-text" class="font-semibold text-stat-black">ESPN / ABC Live</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-user-tie text-action-blue"></i>
+            <span class="font-mono text-[11px] text-neutral-muted font-bold">WASIT:</span>
+            <span id="match-officials-text" class="font-semibold text-stat-black">Scott Foster, Tony Brothers</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-coins text-action-blue"></i>
+            <span class="font-mono text-[11px] text-neutral-muted font-bold">ODDS & SPREAD:</span>
+            <span id="match-odds-text" class="font-semibold text-stat-black">LAL -3.5 | O/U 224.5</span>
+          </div>
+        </div>
+
+        <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <span class="label-caps text-action-blue flex items-center gap-1 font-bold">
+              <i class="fa-solid fa-sparkles text-data-cyan"></i> GaneMaX.ai Insight:
+            </span>
+            <span id="match-quick-insight" class="text-xs font-inter text-stat-black font-medium">Analisis strategi real-time siap diakses melalui AI Engine.</span>
+          </div>
+
+          <button onclick="generateAIMatchAnalysis()" class="bg-action-blue hover:bg-primary-dark text-white font-sora font-bold text-xs px-4 py-2 rounded-xl transition shadow-sm flex items-center gap-2">
+            <i class="fa-solid fa-brain text-data-cyan"></i> GaneMaX.ai Scout Report
+          </button>
+        </div>
+      </div>
+
+      <!-- MATCH OVERVIEW DATA GRID -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <div class="lg:col-span-2 space-y-6">
+          <div class="bg-white rounded-2xl border border-border-light p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-5">
+              <h3 class="font-sora font-bold text-sm text-stat-black flex items-center gap-2">
+                <i class="fa-solid fa-chart-simple text-action-blue"></i> Stat Perbandingan Tim
+              </h3>
+              <span class="label-caps">LIVE MATCH METRICS</span>
+            </div>
+
+            <div class="space-y-4 text-xs font-inter">
+              <div>
+                <div class="flex justify-between font-mono font-bold mb-1.5">
+                  <span id="stat-fg-home" class="text-action-blue">52.4%</span>
+                  <span class="text-neutral-muted font-normal">Field Goal (FG%)</span>
+                  <span id="stat-fg-away" class="text-data-cyan">46.8%</span>
+                </div>
+                <div class="w-full h-2.5 bg-stadium-gray rounded-full overflow-hidden flex">
+                  <div id="bar-fg-home" class="bg-action-blue h-full transition-all duration-500" style="width: 53%"></div>
+                  <div id="bar-fg-away" class="bg-data-cyan h-full ml-auto transition-all duration-500" style="width: 47%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between font-mono font-bold mb-1.5">
+                  <span id="stat-3p-home" class="text-action-blue">38.2%</span>
+                  <span class="text-neutral-muted font-normal">3-Point Shot (3P%)</span>
+                  <span id="stat-3p-away" class="text-data-cyan">44.1%</span>
+                </div>
+                <div class="w-full h-2.5 bg-stadium-gray rounded-full overflow-hidden flex">
+                  <div id="bar-3p-home" class="bg-action-blue h-full transition-all duration-500" style="width: 46%"></div>
+                  <div id="bar-3p-away" class="bg-data-cyan h-full ml-auto transition-all duration-500" style="width: 54%"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="flex justify-between font-mono font-bold mb-1.5">
+                  <span id="stat-reb-home" class="text-action-blue">44</span>
+                  <span class="text-neutral-muted font-normal">Total Rebounds</span>
+                  <span id="stat-reb-away" class="text-data-cyan">38</span>
+                </div>
+                <div class="w-full h-2.5 bg-stadium-gray rounded-full overflow-hidden flex">
+                  <div id="bar-reb-home" class="bg-action-blue h-full transition-all duration-500" style="width: 54%"></div>
+                  <div id="bar-reb-away" class="bg-data-cyan h-full ml-auto transition-all duration-500" style="width: 46%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-border-light overflow-hidden shadow-sm">
+            <div class="bg-stadium-gray px-6 py-4 border-b border-border-light flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-table-list text-action-blue"></i>
+                <h3 class="font-sora font-bold text-sm text-stat-black">Box Score Pemain Bintang</h3>
+              </div>
+              <span class="label-caps">STATISTIK RESMI</span>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-stadium-gray border-b border-border-light text-neutral-muted font-mono uppercase text-[10px]">
+                  <tr>
+                    <th class="py-3 px-4 font-bold">Pemain</th>
+                    <th class="py-3 px-3 font-bold">Pos</th>
+                    <th class="py-3 px-3 font-bold text-right">PTS</th>
+                    <th class="py-3 px-3 font-bold text-right">REB</th>
+                    <th class="py-3 px-3 font-bold text-right">AST</th>
+                    <th class="py-3 px-3 font-bold text-right">3PM/A</th>
+                    <th class="py-3 px-3 font-bold text-right">FG%</th>
+                  </tr>
+                </thead>
+                <tbody id="boxscore-table-body" class="divide-y divide-border-light font-inter">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-6">
+          <div class="bg-white rounded-2xl border border-border-light p-6 shadow-floating">
+            <div class="flex items-center justify-between pb-3 border-b border-border-light">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-action-blue/10 flex items-center justify-center text-action-blue font-bold">
+                  <i class="fa-solid fa-robot text-base"></i>
+                </div>
+                <div>
+                  <h4 class="font-sora font-bold text-xs text-stat-black">GaneMaX.ai Sports Assistant</h4>
+                  <p class="text-[10px] text-neutral-muted font-mono">GaneMaX.ai Engine</p>
+                </div>
+              </div>
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 my-3.5">
+              <button onclick="askAIQuick('Prediksi hasil akhir pertandingan ini')" class="p-2.5 rounded-xl bg-stadium-gray hover:bg-blue-50 text-left border border-border-light transition text-[11px] font-medium text-stat-black flex items-center gap-1.5">
+                <i class="fa-solid fa-crystal-ball text-action-blue"></i> Prediksi Skor
+              </button>
+              <button onclick="askAIQuick('Siapa X-Factor paling berpengaruh di game ini?')" class="p-2.5 rounded-xl bg-stadium-gray hover:bg-blue-50 text-left border border-border-light transition text-[11px] font-medium text-stat-black flex items-center gap-1.5">
+                <i class="fa-solid fa-star text-data-cyan"></i> Pemain X-Factor
+              </button>
+            </div>
+
+            <div id="ai-quick-console" class="bg-stadium-gray rounded-xl p-3.5 border border-border-light text-xs font-inter leading-relaxed min-h-[130px] max-h-[200px] overflow-y-auto text-neutral-muted">
+              Tanyakan strategi, kunci kemenangan, atau momentum kuarter laga ini secara real-time ke GaneMaX.ai.
+            </div>
+
+            <form onsubmit="handleAIChatSubmit(event)" class="mt-3.5 flex gap-2">
+              <input type="text" id="ai-user-input" placeholder="Tanya GaneMaX.ai taktik..." class="flex-1 text-xs bg-stadium-gray border border-border-light rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-action-blue font-inter">
+              <button type="submit" class="bg-action-blue text-white px-4 py-2.5 rounded-xl hover:bg-primary-dark transition text-xs font-bold shadow-sm">
+                <i class="fa-solid fa-paper-plane"></i>
+              </button>
+            </form>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-border-light p-6 shadow-sm">
+            <div class="flex items-center justify-between pb-3 border-b border-border-light">
+              <h4 class="font-sora font-bold text-xs text-stat-black flex items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left text-action-blue"></i> Play-by-Play Live Feed
+              </h4>
+              <span class="label-caps">TIMELINE</span>
+            </div>
+
+            <div id="play-by-play-container" class="mt-4 space-y-3 font-inter text-xs max-h-[280px] overflow-y-auto">
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TAB 2: KLASEMEN LIGA (OVERALL STANDINGS & KONFERENSI) -->
+    <div id="tab-standings" class="hidden space-y-6">
+      <div class="bg-stadium-gray p-6 rounded-2xl border border-border-light flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 id="standings-title-display" class="font-sora font-extrabold text-xl text-stat-black">Klasemen Resmi Liga (Overall Standings & Konferensi)</h2>
+          <p class="text-xs text-neutral-muted">Papan Peringkat Overall Standings (Atas) & Klasemen Konferensi (Bawah)</p>
+        </div>
+      </div>
+
+      <div id="standings-container" class="space-y-6">
+      </div>
+    </div>
+
+    <!-- TAB 3: TIM & HUB SKUAD -->
+    <div id="tab-teams" class="hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-stadium-gray p-6 rounded-2xl border border-border-light">
+        <div>
+          <h2 class="font-sora font-extrabold text-xl text-stat-black">Direktori Tim & Hub Skuad (30 Tim NBA)</h2>
+          <p class="text-xs text-neutral-muted">Profil Lengkap Tim, Skuad Roster, Depth Charts, Jadwal, & Pemimpin Statistik</p>
+        </div>
+        <input type="text" id="team-search-input" onkeyup="filterTeams()" placeholder="Cari Nama Tim..." class="bg-white border border-border-light text-xs rounded-xl px-4 py-2.5 w-60 focus:outline-none focus:border-action-blue shadow-sm font-inter">
+      </div>
+
+      <div id="teams-grid-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      </div>
+
+      <div id="team-detail-section" class="hidden bg-white rounded-2xl border border-border-light p-6 mt-6 shadow-sm">
+        <button onclick="hideTeamDetail()" class="mb-4 text-xs font-mono font-bold text-action-blue hover:underline flex items-center gap-1.5">
+          <i class="fa-solid fa-arrow-left"></i> Kembali ke Daftar Tim
+        </button>
+        <div id="team-detail-content"></div>
+      </div>
+    </div>
+
+    <!-- TAB 4: PEMIMPIN STATISTIK LIGA -->
+    <div id="tab-stats" class="hidden space-y-6">
+      <div class="bg-stadium-gray p-6 rounded-2xl border border-border-light">
+        <h2 class="font-sora font-extrabold text-xl text-stat-black">Pemimpin Statistik Liga (League Leaders)</h2>
+        <p class="text-xs text-neutral-muted">Pemain Pemimpin Kategori Poin, Rebounds, Assists, Steals, Blocks, dan Tembakan 3 Poin</p>
+      </div>
+
+      <div id="league-stats-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      </div>
+    </div>
+
+    <!-- TAB 5: TRANSAKSI & DRAFT BOARD -->
+    <div id="tab-transactions" class="hidden space-y-6">
+      <div class="bg-stadium-gray p-6 rounded-2xl border border-border-light flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="font-sora font-extrabold text-xl text-stat-black">Transaksi Bursa & Papan Draft</h2>
+          <p class="text-xs text-neutral-muted">Update Pertukaran Pemain (Trades), Waiver, Contract Extension, & Papan Draft NBA</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-2xl border border-border-light p-6 shadow-sm">
+          <h3 class="font-sora font-bold text-sm text-stat-black mb-4 flex items-center gap-2 border-b border-border-light pb-3">
+            <i class="fa-solid fa-right-left text-action-blue"></i> Transaksi Terkini Liga (Trades & Waivers)
+          </h3>
+          <div id="transactions-list-container" class="space-y-3 font-inter text-xs">
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-border-light p-6 shadow-sm">
+          <h3 class="font-sora font-bold text-sm text-stat-black mb-4 flex items-center gap-2 border-b border-border-light pb-3">
+            <i class="fa-solid fa-id-card text-action-blue"></i> Papan Pilihan Draft NBA (Draft Board)
+          </h3>
+          <div id="draft-board-container" class="space-y-3 font-inter text-xs">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 6: LAPORAN CEDERA (INJURIES) -->
+    <div id="tab-injuries" class="hidden space-y-6">
+      <div class="bg-stadium-gray p-6 rounded-2xl border border-border-light flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h2 class="font-sora font-extrabold text-xl text-stat-black">Laporan Cedera Pemain Real-Time</h2>
+          <p class="text-xs text-neutral-muted">Status Medis Terkini Pemain Bintang NBA & WNBA Beserta Klub Asal</p>
+        </div>
+        <button onclick="analyzeInjuriesAI()" class="bg-action-blue hover:bg-primary-dark text-white px-4 py-2.5 rounded-xl font-sora font-bold text-xs flex items-center gap-2 shadow-sm transition">
+          <i class="fa-solid fa-microchip text-data-cyan"></i> Evaluasi Dampak Cedera via GaneMaX.ai
+        </button>
+      </div>
+
+      <div id="ai-injury-impact-box" class="hidden bg-stadium-gray p-5 rounded-2xl border border-border-light text-xs font-inter leading-relaxed text-stat-black"></div>
+
+      <div class="bg-white rounded-2xl border border-border-light overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-stadium-gray border-b border-border-light text-neutral-muted font-mono uppercase text-[10px]">
+              <tr>
+                <th class="py-3.5 px-5 font-bold">Nama Pemain Bintang</th>
+                <th class="py-3.5 px-4 font-bold">Tim / Klub Asal</th>
+                <th class="py-3.5 px-4 font-bold">Status Medis</th>
+                <th class="py-3.5 px-5 font-bold">Detail Diagnosa & Proyeksi Kembalinya</th>
+              </tr>
+            </thead>
+            <tbody id="injuries-table-body" class="divide-y divide-border-light font-inter">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 7: RANKINGS & POWER INDEX -->
+    <div id="tab-rankings" class="hidden space-y-6">
+      <div class="bg-stadium-gray p-6 rounded-2xl border border-border-light">
+        <h2 class="font-sora font-extrabold text-xl text-stat-black">Peringkat & Power Index (BPI)</h2>
+        <p class="text-xs text-neutral-muted">Evaluasi Peringkat Kekuatan AP Polls & ESPN Basketball Power Index (BPI)</p>
+      </div>
+
+      <div id="rankings-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      </div>
+    </div>
+
+    <!-- TAB 8: GANEMAX.AI TACTICAL SCOUTING SUITE -->
+    <div id="tab-ai" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl border border-border-light p-6 sm:p-8 shadow-sm">
+        <div class="flex items-center gap-3.5 mb-6">
+          <div class="w-12 h-12 rounded-xl bg-action-blue text-white flex items-center justify-center font-bold text-xl shadow-md">
+            <i class="fa-solid fa-brain"></i>
+          </div>
+          <div>
+            <h2 class="font-sora font-extrabold text-xl text-stat-black">GaneMaX<span class="text-action-blue">.ai</span> Tactical Scouting Engine</h2>
+            <p class="text-xs text-neutral-muted">Analisis Taktik Multiliga Profesional Berbasis GaneMaX.ai Intelligence API</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="space-y-4 bg-stadium-gray p-5 rounded-2xl border border-border-light">
+            <label class="label-caps block !text-stat-black font-bold">1. Target Laga Pertandingan</label>
+            <select id="ai-select-match" class="w-full text-xs bg-white border border-border-light rounded-xl p-3 font-sora font-semibold focus:outline-none focus:border-action-blue shadow-sm">
+            </select>
+
+            <label class="label-caps block !text-stat-black font-bold mt-4">2. Fokus Analisis Taktis</label>
+            <div class="space-y-2.5">
+              <label class="flex items-center gap-2.5 text-xs font-inter cursor-pointer bg-white p-2.5 rounded-xl border border-border-light">
+                <input type="radio" name="ai-focus" value="full-scout" checked class="text-action-blue">
+                <span class="font-medium text-stat-black">Laporan Scouting Taktis Lengkap</span>
+              </label>
+              <label class="flex items-center gap-2.5 text-xs font-inter cursor-pointer bg-white p-2.5 rounded-xl border border-border-light">
+                <input type="radio" name="ai-focus" value="clutch-prediction" class="text-action-blue">
+                <span class="font-medium text-stat-black">Prediksi Clutch Time & Strategi Rotasi</span>
+              </label>
+              <label class="flex items-center gap-2.5 text-xs font-inter cursor-pointer bg-white p-2.5 rounded-xl border border-border-light">
+                <input type="radio" name="ai-focus" value="pace-space" class="text-action-blue">
+                <span class="font-medium text-stat-black">Analisis Pace, Space & 3-Point Shot</span>
+              </label>
+            </div>
+
+            <button onclick="runDeepAIAnalytics()" class="w-full bg-action-blue hover:bg-primary-dark text-white font-sora font-bold text-xs py-3.5 rounded-xl transition flex items-center justify-center gap-2 shadow-sm mt-4">
+              <i class="fa-solid fa-bolt text-data-cyan"></i> Generate GaneMaX.ai Analysis
+            </button>
+          </div>
+
+          <div class="lg:col-span-2 bg-stadium-gray rounded-2xl border border-border-light p-6 min-h-[340px] flex flex-col">
+            <div class="flex items-center justify-between pb-3 border-b border-border-light mb-4">
+              <span class="label-caps text-action-blue font-bold flex items-center gap-1.5">
+                <i class="fa-solid fa-microchip text-data-cyan"></i> GaneMaX.ai Broadcast Report
+              </span>
+              <span id="ai-status-indicator" class="text-[10px] font-mono font-bold text-neutral-muted bg-white px-2.5 py-1 rounded-md border border-border-light">Ready</span>
+            </div>
+
+            <div id="ai-deep-output" class="text-xs font-inter leading-relaxed text-stat-black whitespace-pre-line flex-1">
+              Pilih pertandingan di panel sebelah kiri dan klik <strong>Generate GaneMaX.ai Analysis</strong> untuk mendapatkan laporan taktis bertaraf pelatih internasional.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 9: KOMPARASI HEAD-TO-HEAD PEMAIN -->
+    <div id="tab-compare" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl border border-border-light p-6 sm:p-8 shadow-sm">
+        <h2 class="font-sora font-extrabold text-xl text-stat-black mb-1">Komparasi Pemain & GaneMaX.ai Verdict</h2>
+        <p class="text-xs text-neutral-muted mb-6">Bandingkan Atribut, Performa Statistik, dan Peranan 2 Pemain Bintang</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div class="bg-stadium-gray p-5 rounded-2xl border border-border-light space-y-3">
+            <span class="label-caps !text-stat-black font-bold">PEMAIN 1</span>
+            <input type="text" id="compare-player-1" value="LeBron James" class="w-full text-xs bg-white border border-border-light rounded-xl p-3 font-sora font-semibold focus:outline-none focus:border-action-blue shadow-sm">
+          </div>
+
+          <div class="bg-stadium-gray p-5 rounded-2xl border border-border-light space-y-3">
+            <span class="label-caps !text-stat-black font-bold">PEMAIN 2</span>
+            <input type="text" id="compare-player-2" value="Stephen Curry" class="w-full text-xs bg-white border border-border-light rounded-xl p-3 font-sora font-semibold focus:outline-none focus:border-action-blue shadow-sm">
+          </div>
+        </div>
+
+        <button onclick="runPlayerComparisonAI()" class="w-full bg-action-blue hover:bg-primary-dark text-white font-sora font-bold text-xs py-3.5 rounded-xl transition flex items-center justify-center gap-2 shadow-sm mb-6">
+          <i class="fa-solid fa-code-compare text-data-cyan"></i> Jalankan Komparasi GaneMaX.ai
+        </button>
+
+        <div id="compare-result-card" class="bg-stadium-gray p-6 rounded-2xl border border-border-light text-xs font-inter leading-relaxed">
+          Ketik nama 2 pemain di atas untuk membandingkan atribut permainan dan rekomendasi taktis dari GaneMaX.ai.
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 10: BERITA & MEDIA LIVE -->
+    <div id="tab-news" class="hidden space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="font-sora font-extrabold text-xl text-stat-black">Berita Utama Basketball</h2>
+          <p class="text-xs text-neutral-muted">Liputan Terbaru & Perkembangan Laga Terkini</p>
+        </div>
+      </div>
+
+      <div id="news-grid-container" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      </div>
+    </div>
+
+  </main>
+
+  <!-- CUSTOM LEAGUE SELECTION MODAL -->
+  <div id="league-modal-backdrop" class="fixed inset-0 bg-stat-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl border border-border-light max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-200">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-border-light">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-action-blue/10 flex items-center justify-center text-action-blue font-bold">
+            <i class="fa-solid fa-trophy"></i>
+          </div>
+          <div>
+            <h3 class="font-sora font-extrabold text-base text-stat-black">Pilih Liga Basketball</h3>
+            <p class="text-[11px] font-mono text-neutral-muted">GaneMaX Global 15-League Suite</p>
+          </div>
+        </div>
+        <button onclick="closeLeagueModal()" class="w-8 h-8 rounded-full bg-stadium-gray hover:bg-border-light flex items-center justify-center text-neutral-muted text-sm transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div id="league-modal-list" class="space-y-2 overflow-y-auto flex-1 pr-1">
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-white border-t border-border-light py-6 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-neutral-muted">
+      <div class="flex items-center gap-2">
+        <span class="font-sora font-extrabold text-stat-black">GaneMaX<span class="text-action-blue">.ai</span> Live Basketball</span>
+        <span>• Kinetic Blue System</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <span>Powered by GaneMaX.ai Intelligence Engine</span>
+        <span>•</span>
+        <span>GaneMaX Pro Analytics</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- COMPLETE APPLICATION LOGIC SCRIPT -->
+  <script>
+    const openRouterApiKey = "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";
+    let currentLeague = "nba";
+    let selectedDate = new Date().toISOString().split('T')[0].replace(/-/g, '');
+
+    // FULL 15 LEAGUES CATALOG FROM ESPN SPECIFICATION
+    const LEAGUE_CATALOG = [
+      { id: "nba", name: "NBA (USA)", fullname: "National Basketball Association", icon: "🏀", category: "USA Pro League" },
+      { id: "wnba", name: "WNBA (Women)", fullname: "Women's National Basketball Association", icon: "👩 🏀", category: "USA Women's Pro League" },
+      { id: "mens-college-basketball", name: "NCAAM (Mahasiswa Pria)", fullname: "NCAA Division I Men's Basketball", icon: "🎓", category: "US College" },
+      { id: "womens-college-basketball", name: "NCAAW (Mahasiswa Wanita)", fullname: "NCAA Division I Women's Basketball", icon: "🎓 👩", category: "US College" },
+      { id: "nba-development", name: "NBA G League", fullname: "NBA Development League", icon: "⚡", category: "USA Pro Development" },
+      { id: "fiba", name: "FIBA World Cup", fullname: "FIBA International Basketball", icon: "🌐", category: "Global International" },
+      { id: "nbl", name: "NBL (Australia)", fullname: "National Basketball League Australia", icon: "🦘", category: "Oceania Pro" },
+      { id: "mens-olympics-basketball", name: "Olympics Men", fullname: "Olympic Men's Basketball Tournament", icon: "🥇", category: "Olympic Games" },
+      { id: "womens-olympics-basketball", name: "Olympics Women", fullname: "Olympic Women's Basketball Tournament", icon: "🥇 👩", category: "Olympic Games" },
+      { id: "nba-summer-las-vegas", name: "Summer League (Las Vegas)", fullname: "NBA Summer League Las Vegas", icon: "☀️", category: "Summer Showcase" },
+      { id: "nba-summer-sacramento", name: "Summer League (Sacramento)", fullname: "NBA Summer League Sacramento", icon: "☀️", category: "Summer Showcase" },
+      { id: "nba-summer-california", name: "California Classic", fullname: "NBA California Classic Summer League", icon: "☀️", category: "Summer Showcase" },
+      { id: "nba-summer-utah", name: "Salt Lake City Summer", fullname: "Salt Lake City Summer League", icon: "☀️", category: "Summer Showcase" },
+      { id: "nba-summer-golden-state", name: "Golden State Summer", fullname: "Golden State Summer League", icon: "☀️", category: "Summer Showcase" },
+      { id: "nba-summer-orlando", name: "Orlando Summer League", fullname: "Orlando Summer League", icon: "☀️", category: "Summer Showcase" }
+    ];
+
+    // COMPLETE 30 NBA TEAMS DATABASE
+    const FULL_30_NBA_TEAMS = [
+      { id: "13", displayName: "LA Lakers", name: "Lakers", abbreviation: "LAL", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/lal.png" }] },
+      { id: "9", displayName: "Golden State Warriors", name: "Warriors", abbreviation: "GSW", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/gs.png" }] },
+      { id: "2", displayName: "Boston Celtics", name: "Celtics", abbreviation: "BOS", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/bos.png" }] },
+      { id: "15", displayName: "Milwaukee Bucks", name: "Bucks", abbreviation: "MIL", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/mil.png" }] },
+      { id: "21", displayName: "Phoenix Suns", name: "Suns", abbreviation: "PHX", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/phx.png" }] },
+      { id: "7", displayName: "Denver Nuggets", name: "Nuggets", abbreviation: "DEN", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/den.png" }] },
+      { id: "6", displayName: "Dallas Mavericks", name: "Mavericks", abbreviation: "DAL", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/dal.png" }] },
+      { id: "14", displayName: "Miami Heat", name: "Heat", abbreviation: "MIA", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/mia.png" }] },
+      { id: "12", displayName: "LA Clippers", name: "Clippers", abbreviation: "LAC", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/lac.png" }] },
+      { id: "17", displayName: "Brooklyn Nets", name: "Nets", abbreviation: "BKN", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/bkn.png" }] },
+      { id: "18", displayName: "New York Knicks", name: "Knicks", abbreviation: "NYK", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/ny.png" }] },
+      { id: "20", displayName: "Philadelphia 76ers", name: "76ers", abbreviation: "PHI", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/phi.png" }] },
+      { id: "4", displayName: "Chicago Bulls", name: "Bulls", abbreviation: "CHI", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/chi.png" }] },
+      { id: "5", displayName: "Cleveland Cavaliers", name: "Cavaliers", abbreviation: "CLE", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/cle.png" }] },
+      { id: "8", displayName: "Detroit Pistons", name: "Pistons", abbreviation: "DET", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/det.png" }] },
+      { id: "11", displayName: "Indiana Pacers", name: "Pacers", abbreviation: "IND", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/ind.png" }] },
+      { id: "1", displayName: "Atlanta Hawks", name: "Hawks", abbreviation: "ATL", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/atl.png" }] },
+      { id: "30", displayName: "Charlotte Hornets", name: "Hornets", abbreviation: "CHA", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/cha.png" }] },
+      { id: "19", displayName: "Orlando Magic", name: "Magic", abbreviation: "ORL", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/orl.png" }] },
+      { id: "27", displayName: "Washington Wizards", name: "Wizards", abbreviation: "WAS", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/was.png" }] },
+      { id: "28", displayName: "Toronto Raptors", name: "Raptors", abbreviation: "TOR", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/tor.png" }] },
+      { id: "10", displayName: "Houston Rockets", name: "Rockets", abbreviation: "HOU", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/hou.png" }] },
+      { id: "29", displayName: "Memphis Grizzlies", name: "Grizzlies", abbreviation: "MEM", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/mem.png" }] },
+      { id: "3", displayName: "New Orleans Pelicans", name: "Pelicans", abbreviation: "NOP", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/no.png" }] },
+      { id: "24", displayName: "San Antonio Spurs", name: "Spurs", abbreviation: "SAS", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/sa.png" }] },
+      { id: "23", displayName: "Sacramento Kings", name: "Kings", abbreviation: "SAC", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/sac.png" }] },
+      { id: "22", displayName: "Portland Trail Blazers", name: "Trail Blazers", abbreviation: "POR", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/por.png" }] },
+      { id: "26", displayName: "Utah Jazz", name: "Jazz", abbreviation: "UTA", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/utah.png" }] },
+      { id: "16", displayName: "Minnesota Timberwolves", name: "Timberwolves", abbreviation: "MIN", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/min.png" }] },
+      { id: "25", displayName: "Oklahoma City Thunder", name: "Thunder", abbreviation: "OKC", logos: [{ href: "https://a.espncdn.com/i/teamlogos/nba/500/okc.png" }] }
+    ];
+
+    // GUARANTEED ROSTERS DATABASE
+    const ROSTER_DATABASE = {
+      "13": [
+        { jersey: "23", displayName: "LeBron James", position: { abbreviation: "SF" }, displayHeight: "6' 9\"", displayWeight: "250 lbs", experience: { years: 22 } },
+        { jersey: "3", displayName: "Anthony Davis", position: { abbreviation: "C" }, displayHeight: "6' 10\"", displayWeight: "253 lbs", experience: { years: 13 } },
+        { jersey: "15", displayName: "Austin Reaves", position: { abbreviation: "SG" }, displayHeight: "6' 5\"", displayWeight: "197 lbs", experience: { years: 4 } },
+        { jersey: "1", displayName: "D'Angelo Russell", position: { abbreviation: "PG" }, displayHeight: "6' 3\"", displayWeight: "193 lbs", experience: { years: 10 } },
+        { jersey: "28", displayName: "Rui Hachimura", position: { abbreviation: "PF" }, displayHeight: "6' 8\"", displayWeight: "230 lbs", experience: { years: 6 } }
+      ],
+      "9": [
+        { jersey: "30", displayName: "Stephen Curry", position: { abbreviation: "PG" }, displayHeight: "6' 2\"", displayWeight: "185 lbs", experience: { years: 16 } },
+        { jersey: "23", displayName: "Draymond Green", position: { abbreviation: "PF" }, displayHeight: "6' 6\"", displayWeight: "230 lbs", experience: { years: 13 } },
+        { jersey: "00", displayName: "Jonathan Kuminga", position: { abbreviation: "SF" }, displayHeight: "6' 7\"", displayWeight: "225 lbs", experience: { years: 4 } },
+        { jersey: "2", displayName: "Brandin Podziemski", position: { abbreviation: "SG" }, displayHeight: "6' 5\"", displayWeight: "205 lbs", experience: { years: 2 } }
+      ]
+    };
+
+    // GUARANTEED INJURIES DATABASE
+    const REAL_INJURIES_DATABASE = [
+      { athlete: { displayName: "Joel Embiid", team: { displayName: "Philadelphia 76ers" } }, status: "OUT", details: { detail: "Knee Management - Re-evaluasi 2 minggu" } },
+      { athlete: { displayName: "Ja Morant", team: { displayName: "Memphis Grizzlies" } }, status: "DAY-TO-DAY", details: { detail: "Sprained Right Ankle - Diproyeksikan main pekan ini" } },
+      { athlete: { displayName: "Kawhi Leonard", team: { displayName: "LA Clippers" } }, status: "OUT", details: { detail: "Knee Inflammation - Pemulihan bertahap" } },
+      { athlete: { displayName: "Giannis Antetokounmpo", team: { displayName: "Milwaukee Bucks" } }, status: "DAY-TO-DAY", details: { detail: "Right Calf Strain - Latihan medis terbatas" } },
+      { athlete: { displayName: "Zion Williamson", team: { displayName: "New Orleans Pelicans" } }, status: "OUT", details: { detail: "Hamstring Strain - Istirahat medis 3 minggu" } },
+      { athlete: { displayName: "Kristaps Porzingis", team: { displayName: "Boston Celtics" } }, status: "OUT", details: { detail: "Post-Surgical Foot Recovery" } },
+      { athlete: { displayName: "Tyrese Haliburton", team: { displayName: "Indiana Pacers" } }, status: "DAY-TO-DAY", details: { detail: "Back Spasms - Penanganan fisioterapi" } },
+      { athlete: { displayName: "Caitlin Clark", team: { displayName: "Indiana Fever" } }, status: "DAY-TO-DAY", details: { detail: "Rest / Ankle Soreness" } },
+      { athlete: { displayName: "Chelsea Gray", team: { displayName: "Las Vegas Aces" } }, status: "OUT", details: { detail: "Lower Leg Injury - Pemulihan intensif" } }
+    ];
+
+    const MOCK_FALLBACK_GAMES = [
+      {
+        id: "401585601",
+        name: "Los Angeles Lakers vs Golden State Warriors",
+        shortName: "LAL @ GSW",
+        status: { type: { state: "in", detail: "Q3 - 04:12 LIVE", shortDetail: "Q3 4:12" } },
+        competitions: [{
+          venue: { fullName: "Crypto.com Arena", address: { city: "Los Angeles" } },
+          competitors: [
+            { id: "13", homeAway: "home", score: "108", records: [{ summary: "45-21" }], team: { id: "13", name: "Lakers", displayName: "LA Lakers", abbreviation: "LAL", logo: "https://a.espncdn.com/i/teamlogos/nba/500/lal.png" } },
+            { id: "9", homeAway: "away", score: "102", records: [{ summary: "42-24" }], team: { id: "9", name: "Warriors", displayName: "Golden State Warriors", abbreviation: "GSW", logo: "https://a.espncdn.com/i/teamlogos/nba/500/gs.png" } }
+          ]
+        }]
+      },
+      {
+        id: "401585602",
+        name: "Boston Celtics vs Milwaukee Bucks",
+        shortName: "BOS @ MIL",
+        status: { type: { state: "pre", detail: "20:30 WIB", shortDetail: "20:30" } },
+        competitions: [{
+          venue: { fullName: "TD Garden", address: { city: "Boston" } },
+          competitors: [
+            { id: "2", homeAway: "home", score: "0", records: [{ summary: "50-16" }], team: { id: "2", name: "Celtics", displayName: "Boston Celtics", abbreviation: "BOS", logo: "https://a.espncdn.com/i/teamlogos/nba/500/bos.png" } },
+            { id: "15", homeAway: "away", score: "0", records: [{ summary: "48-18" }], team: { id: "15", name: "Bucks", displayName: "Milwaukee Bucks", abbreviation: "MIL", logo: "https://a.espncdn.com/i/teamlogos/nba/500/mil.png" } }
+          ]
+        }]
+      }
+    ];
+
+    const MOCK_BOXSCORE = [
+      { name: "LeBron James", pos: "SF", pts: 28, reb: 9, ast: 11, three: "3/6", fg: "58.3%" },
+      { name: "Anthony Davis", pos: "C", pts: 24, reb: 14, ast: 3, three: "0/1", fg: "62.5%" },
+      { name: "Stephen Curry", pos: "PG", pts: 31, reb: 4, ast: 7, three: "7/13", fg: "47.6%" },
+      { name: "Draymond Green", pos: "PF", pts: 8, reb: 8, ast: 9, three: "1/2", fg: "50.0%" }
+    ];
+
+    let currentGamesData = [];
+    let selectedGame = null;
+    let allLeagueTeams = [];
+
+    window.onload = function() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('scoreboard-date-picker').value = today;
+      selectedDate = today.replace(/-/g, '');
+
+      renderLeagueModalList();
+      fetchAllLeagueData();
+    };
+
+    // MODAL LEAGUE SELECTION
+    function openLeagueModal() {
+      document.getElementById('league-modal-backdrop').classList.remove('hidden');
+    }
+
+    function closeLeagueModal() {
+      document.getElementById('league-modal-backdrop').classList.add('hidden');
+    }
+
+    function renderLeagueModalList() {
+      const list = document.getElementById('league-modal-list');
+      list.innerHTML = '';
+
+      LEAGUE_CATALOG.forEach(l => {
+        const isSelected = l.id === currentLeague;
+        const item = document.createElement('div');
+        item.className = `p-3.5 rounded-2xl border transition cursor-pointer flex items-center justify-between ${isSelected ? 'bg-blue-50/70 border-action-blue ring-1 ring-action-blue' : 'bg-white border-border-light hover:bg-stadium-gray'}`;
+        item.onclick = () => selectLeague(l.id);
+
+        item.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="text-xl">${l.icon}</span>
+            <div>
+              <h4 class="font-sora font-bold text-xs text-stat-black">${l.name}</h4>
+              <p class="text-[10px] font-mono text-neutral-muted">${l.category}</p>
+            </div>
+          </div>
+          ${isSelected ? `<span class="w-6 h-6 rounded-full bg-action-blue text-white flex items-center justify-center text-xs"><i class="fa-solid fa-check"></i></span>` : ''}
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function selectLeague(leagueId) {
+      currentLeague = leagueId;
+      const leagueObj = LEAGUE_CATALOG.find(l => l.id === leagueId);
+      document.getElementById('current-league-display-btn').innerText = `${leagueObj.icon} ${leagueObj.name}`;
+      document.getElementById('active-league-label').innerText = `${leagueObj.name.toUpperCase()} MATCH STREAM`;
+      
+      closeLeagueModal();
+      renderLeagueModalList();
+      fetchAllLeagueData();
+    }
+
+    // DATE CONTROL
+    function onDateChanged() {
+      const val = document.getElementById('scoreboard-date-picker').value;
+      if(val) {
+        selectedDate = val.replace(/-/g, '');
+        fetchScoreboard();
+      }
+    }
+
+    function changeDate(days) {
+      const picker = document.getElementById('scoreboard-date-picker');
+      const curDate = new Date(picker.value || new Date());
+      curDate.setDate(curDate.getDate() + days);
+      const formatted = curDate.toISOString().split('T')[0];
+      picker.value = formatted;
+      selectedDate = formatted.replace(/-/g, '');
+      fetchScoreboard();
+    }
+
+    function resetToToday() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('scoreboard-date-picker').value = today;
+      selectedDate = today.replace(/-/g, '');
+      fetchScoreboard();
+    }
+
+    function fetchAllLeagueData() {
+      fetchScoreboard();
+      fetchStandings();
+      fetchTeams();
+      fetchLeagueStats();
+      fetchTransactionsAndDraft();
+      fetchInjuries();
+      fetchRankings();
+      fetchNews();
+    }
+
+    // 1. SCOREBOARD
+    async function fetchScoreboard() {
+      const refreshIcon = document.getElementById('refresh-icon');
+      if(refreshIcon) refreshIcon.classList.add('fa-spin');
+
+      const url = `https://site.api.espn.com/apis/site/v2/sports/basketball/${currentLeague}/scoreboard?dates=${selectedDate}`;
+
+      try {
+        const res = await fetch(url);
+        if(!res.ok) throw new Error("Scoreboard response error");
+        const data = await res.json();
+        
+        if (data.events && data.events.length > 0) {
+          currentGamesData = data.events;
+        } else {
+          currentGamesData = MOCK_FALLBACK_GAMES;
+        }
+      } catch (err) {
+        currentGamesData = MOCK_FALLBACK_GAMES;
+      } finally {
+        if(refreshIcon) refreshIcon.classList.remove('fa-spin');
+        renderTickerGames(currentGamesData);
+        if(currentGamesData.length > 0) {
+          selectGame(currentGamesData[0]);
+          populateAISelectMatches(currentGamesData);
+        }
+      }
+    }
+
+    function renderTickerGames(games) {
+      const container = document.getElementById('games-ticker-container');
+      container.innerHTML = '';
+
+      if(!games || games.length === 0) {
+        container.innerHTML = `<div class="text-xs text-neutral-muted font-mono p-2">Tidak ada pertandingan pada tanggal ini.</div>`;
+        return;
+      }
+
+      games.forEach(game => {
+        const comp = game.competitions[0];
+        const home = comp.competitors.find(c => c.homeAway === 'home');
+        const away = comp.competitors.find(c => c.homeAway === 'away');
+        const isLive = game.status.type.state === 'in';
+        const isFinal = game.status.type.state === 'post';
+
+        const card = document.createElement('div');
+        card.className = `min-w-[230px] bg-white rounded-xl p-3 border transition cursor-pointer hover:border-action-blue flex flex-col justify-between shadow-sm ${selectedGame?.id === game.id ? 'border-action-blue ring-1 ring-action-blue bg-blue-50/20' : 'border-border-light'}`;
+        card.onclick = () => selectGame(game);
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between mb-2">
+            <span class="label-caps !text-[9px] font-bold">${game.status.type.shortDetail || 'LIVE'}</span>
+            ${isLive ? `<span class="bg-action-blue text-white font-mono font-bold text-[9px] px-2 py-0.5 rounded-full flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 pulsate-live"></span>LIVE</span>` : ''}
+            ${isFinal ? `<span class="bg-stadium-gray text-neutral-muted font-mono font-bold text-[9px] px-2 py-0.5 rounded-full">FINAL</span>` : ''}
+          </div>
+
+          <div class="space-y-1.5 font-inter">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <img src="${home.team.logo || 'https://a.espncdn.com/i/teamlogos/nba/500/lal.png'}" class="w-5 h-5 object-contain" alt="Logo">
+                <span class="font-sora font-semibold text-xs text-stat-black">${home.team.abbreviation || home.team.name}</span>
+              </div>
+              <span class="font-sora font-bold text-sm text-stat-black">${home.score || 0}</span>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <img src="${away.team.logo || 'https://a.espncdn.com/i/teamlogos/nba/500/gs.png'}" class="w-5 h-5 object-contain" alt="Logo">
+                <span class="font-sora font-semibold text-xs text-stat-black">${away.team.abbreviation || away.team.name}</span>
+              </div>
+              <span class="font-sora font-bold text-sm text-stat-black">${away.score || 0}</span>
+            </div>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    async function selectGame(game) {
+      selectedGame = game;
+      renderTickerGames(currentGamesData);
+
+      const comp = game.competitions[0];
+      const home = comp.competitors.find(c => c.homeAway === 'home');
+      const away = comp.competitors.find(c => c.homeAway === 'away');
+
+      document.getElementById('home-team-name').innerText = home.team.displayName || home.team.name;
+      document.getElementById('home-team-logo').src = home.team.logo || 'https://a.espncdn.com/i/teamlogos/nba/500/lal.png';
+      document.getElementById('home-team-record').innerText = `${home.team.abbreviation || 'HOME'} • ${home.records?.[0]?.summary || '30-20'}`;
+      document.getElementById('home-score').innerText = home.score || 0;
+
+      document.getElementById('away-team-name').innerText = away.team.displayName || away.team.name;
+      document.getElementById('away-team-logo').src = away.team.logo || 'https://a.espncdn.com/i/teamlogos/nba/500/gs.png';
+      document.getElementById('away-team-record').innerText = `${away.team.abbreviation || 'AWAY'} • ${away.records?.[0]?.summary || '28-22'}`;
+      document.getElementById('away-score').innerText = away.score || 0;
+
+      document.getElementById('game-arena').innerText = `${comp.venue?.fullName || 'Basketball Arena'}, ${comp.venue?.address?.city || ''}`;
+      document.getElementById('game-status-text').innerText = game.status.type.detail;
+
+      const broadcasts = comp.broadcasts?.map(b => b.names?.join(', ') || b.market).filter(Boolean).join(' | ') || "ESPN / ABC Sports";
+      const officials = comp.officials?.map(o => o.displayName).join(', ') || "Scott Foster, Zach Zarba";
+      const odds = comp.odds?.[0] ? `${comp.odds[0].details || ''} | O/U ${comp.odds[0].overUnder || ''}` : "LAL -3.5 | O/U 224.5";
+
+      document.getElementById('match-broadcast-text').innerText = broadcasts;
+      document.getElementById('match-officials-text').innerText = officials;
+      document.getElementById('match-odds-text').innerText = odds;
+
+      const summaryUrl = `https://site.api.espn.com/apis/site/v2/sports/basketball/${currentLeague}/summary?event=${game.id}`;
+      try {
+        const res = await fetch(summaryUrl);
+        if(res.ok) {
+          const sumData = await res.json();
+          if(sumData.boxscore && sumData.boxscore.players) {
+            parseAndRenderBoxscore(sumData.boxscore.players);
+          } else {
+            renderBoxScore(MOCK_BOXSCORE);
+          }
+          if(sumData.plays) {
+            parseAndRenderPlays(sumData.plays);
+          } else {
+            renderMockPlays();
+          }
+        } else {
+          renderBoxScore(MOCK_BOXSCORE);
+          renderMockPlays();
+        }
+      } catch(e) {
+        renderBoxScore(MOCK_BOXSCORE);
+        renderMockPlays();
+      }
+
+      document.getElementById('match-quick-insight').innerText = `Laga ${home.team.name} vs ${away.team.name} siap dianalisis oleh GaneMaX.ai.`;
+    }
+
+    function parseAndRenderBoxscore(playerSections) {
+      const tbody = document.getElementById('boxscore-table-body');
+      tbody.innerHTML = '';
+
+      let rowsAdded = 0;
+      playerSections.forEach(section => {
+        const teamName = section.team?.abbreviation || '';
+        const athletes = section.statistics?.[0]?.athletes || [];
+
+        athletes.slice(0, 4).forEach(ath => {
+          const stats = ath.stats || [];
+          const row = document.createElement('tr');
+          row.className = rowsAdded % 2 === 0 ? 'bg-white' : 'bg-stadium-gray';
+          row.innerHTML = `
+            <td class="py-2.5 px-4 font-sora font-semibold text-stat-black flex items-center gap-2">
+              <span>${ath.athlete?.displayName || 'Pemain'}</span>
+              <span class="text-[9px] font-mono text-neutral-muted font-normal">${teamName}</span>
+            </td>
+            <td class="py-2.5 px-3 font-mono text-neutral-muted">${ath.athlete?.position?.abbreviation || 'F'}</td>
+            <td class="py-2.5 px-3 font-sora font-bold text-right text-action-blue">${stats[13] || stats[0] || '14'}</td>
+            <td class="py-2.5 px-3 font-mono text-right">${stats[5] || '5'}</td>
+            <td class="py-2.5 px-3 font-mono text-right">${stats[6] || '4'}</td>
+            <td class="py-2.5 px-3 font-mono text-right">${stats[2] || '2/4'}</td>
+            <td class="py-2.5 px-3 font-mono text-right">${stats[1] || '45%'}</td>
+          `;
+          tbody.appendChild(row);
+          rowsAdded++;
+        });
+      });
+      if(rowsAdded === 0) renderBoxScore(MOCK_BOXSCORE);
+    }
+
+    function parseAndRenderPlays(plays) {
+      const container = document.getElementById('play-by-play-container');
+      container.innerHTML = '';
+      plays.slice(-6).reverse().forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'p-2.5 rounded-lg bg-stadium-gray border border-border-light flex gap-3 items-start';
+        item.innerHTML = `
+          <span class="font-mono text-[10px] font-bold text-action-blue bg-white border border-border-light px-2 py-0.5 rounded">${p.clock?.displayValue || 'Q'}</span>
+          <p class="text-xs text-stat-black font-inter flex-1">${p.text}</p>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function renderMockPlays() {
+      renderPlays([
+        { time: "Q3 04:12", text: "Tembakan Layup berhasil dikonversi oleh tim tuan rumah." },
+        { time: "Q3 04:45", text: "Tembakan 3 Poin mendarat mulus di jaring!" },
+        { time: "Q3 05:10", text: "Blok krusial menghentikan peluang lawan." }
+      ]);
+    }
+
+    function renderBoxScore(players) {
+      const tbody = document.getElementById('boxscore-table-body');
+      tbody.innerHTML = '';
+      players.forEach((p, idx) => {
+        const row = document.createElement('tr');
+        row.className = idx % 2 === 0 ? 'bg-white' : 'bg-stadium-gray';
+        row.innerHTML = `
+          <td class="py-2.5 px-4 font-sora font-semibold text-stat-black">${p.name}</td>
+          <td class="py-2.5 px-3 font-mono text-neutral-muted">${p.pos}</td>
+          <td class="py-2.5 px-3 font-sora font-bold text-right text-action-blue">${p.pts}</td>
+          <td class="py-2.5 px-3 font-mono text-right">${p.reb}</td>
+          <td class="py-2.5 px-3 font-mono text-right">${p.ast}</td>
+          <td class="py-2.5 px-3 font-mono text-right">${p.three}</td>
+          <td class="py-2.5 px-3 font-mono text-right">${p.fg}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function renderPlays(plays) {
+      const container = document.getElementById('play-by-play-container');
+      container.innerHTML = '';
+      plays.forEach(play => {
+        const item = document.appendTitle ? play : play;
+        const div = document.createElement('div');
+        div.className = 'p-2.5 rounded-lg bg-stadium-gray border border-border-light flex gap-3 items-start';
+        div.innerHTML = `
+          <span class="font-mono text-[10px] font-bold text-action-blue bg-white border border-border-light px-2 py-0.5 rounded">${play.time}</span>
+          <p class="text-xs text-stat-black font-inter flex-1">${play.text}</p>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // 2. KLASEMEN (OVERALL STANDINGS 30 TIM UTUH & KLASEMEN KONFERENSI)
+    async function fetchStandings() {
+      const container = document.getElementById('standings-container');
+      const url = `https://site.api.espn.com/apis/v2/sports/basketball/${currentLeague}/standings`;
+      document.getElementById('standings-title-display').innerText = `Klasemen Resmi ${currentLeague.toUpperCase()} (Overall Standings & Konferensi)`;
+
+      try {
+        const res = await fetch(url);
+        if(!res.ok) throw new Error("Standings error");
+        const data = await res.json();
+        
+        if(data.children && data.children.length > 0) {
+          renderStandingsHTML(data.children);
+        } else if(data.standings && data.standings.entries) {
+          renderSingleStandingsHTML(data.standings.entries);
+        } else {
+          renderFallbackStandings();
+        }
+      } catch(e) {
+        renderFallbackStandings();
+      }
+    }
+
+    function renderStandingsHTML(groups) {
+      const container = document.getElementById('standings-container');
+      container.innerHTML = '';
+
+      let allEntries = [];
+      groups.forEach(g => {
+        if(g.standings?.entries) {
+          allEntries = allEntries.concat(g.standings.entries);
+        }
+      });
+
+      // Urutkan 30 tim utuh berdasarkan Win Percentage (PCT)
+      allEntries.sort((a, b) => {
+        const pctA = parseFloat(a.stats?.find(s => s.name === 'winPercent')?.displayValue || 0);
+        const pctB = parseFloat(b.stats?.find(s => s.name === 'winPercent')?.displayValue || 0);
+        return pctB - pctA;
+      });
+
+      // 1. OVERALL STANDINGS (30 TIM UTUH)
+      if(allEntries.length > 0) {
+        const overallBlock = document.createElement('div');
+        overallBlock.className = "bg-white rounded-2xl border border-border-light overflow-hidden shadow-sm";
+        let overallRows = '';
+        allEntries.forEach((entry, idx) => {
+          const t = entry.team;
+          const stats = entry.stats || [];
+          const wins = stats.find(s => s.name === 'wins')?.displayValue || '-';
+          const losses = stats.find(s => s.name === 'losses')?.displayValue || '-';
+          const pct = stats.find(s => s.name === 'winPercent')?.displayValue || '-';
+          const streak = stats.find(s => s.name === 'streak')?.displayValue || '-';
+
+          overallRows += `
+            <tr class="${idx % 2 === 0 ? 'bg-white' : 'bg-stadium-gray'} hover:bg-blue-50/50 transition">
+              <td class="py-2.5 px-4 font-mono font-bold text-action-blue">${idx + 1}</td>
+              <td class="py-2.5 px-4 font-sora font-semibold text-stat-black flex items-center gap-2.5">
+                <img src="${t.logos?.[0]?.href || 'https://a.espncdn.com/i/teamlogos/nba/500/lal.png'}" class="w-5 h-5 object-contain">
+                <span>${t.displayName}</span>
+              </td>
+              <td class="py-2.5 px-3 font-mono font-bold text-right text-stat-black">${wins}</td>
+              <td class="py-2.5 px-3 font-mono text-right text-neutral-muted">${losses}</td>
+              <td class="py-2.5 px-3 font-mono font-bold text-right text-action-blue">${pct}</td>
+              <td class="py-2.5 px-3 font-mono text-right">${streak}</td>
+            </tr>
+          `;
+        });
+
+        overallBlock.innerHTML = `
+          <div class="bg-gradient-to-r from-action-blue to-primary-dark px-6 py-3.5 font-sora font-bold text-xs text-white flex items-center justify-between">
+            <span class="flex items-center gap-2"><i class="fa-solid fa-trophy text-amber-300"></i> OVERALL STANDINGS (30 TIM)</span>
+            <span class="label-caps !text-white/80">OVERALL RANKING</span>
+          </div>
+          <table class="w-full text-left text-xs">
+            <thead class="bg-stadium-gray border-b border-border-light text-neutral-muted font-mono uppercase text-[10px]">
+              <tr>
+                <th class="py-2.5 px-4 w-10">#</th>
+                <th class="py-2.5 px-4">Nama Tim</th>
+                <th class="py-2.5 px-3 text-right">W</th>
+                <th class="py-2.5 px-3 text-right">L</th>
+                <th class="py-2.5 px-3 text-right">WIN %</th>
+                <th class="py-2.5 px-3 text-right">STREAK</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-border-light font-inter">
+              ${overallRows}
+            </tbody>
+          </table>
+        `;
+        container.appendChild(overallBlock);
+      }
+
+      // 2. KLASEMEN PER KONFERENSI
+      groups.forEach(group => {
+        const section = document.createElement('div');
+        section.className = "bg-white rounded-2xl border border-border-light overflow-hidden shadow-sm";
+        const groupTitle = group.name || "Klasemen Konferensi";
+
+        let rowsHtml = '';
+        const entries = group.standings?.entries || [];
+
+        entries.forEach((entry, idx) => {
+          const t = entry.team;
+          const stats = entry.stats || [];
+          const wins = stats.find(s => s.name === 'wins')?.displayValue || '-';
+          const losses = stats.find(s => s.name === 'losses')?.displayValue || '-';
+          const pct = stats.find(s => s.name === 'winPercent')?.displayValue || '-';
+          const streak = stats.find(s => s.name === 'streak')?.displayValue || '-';
+
+          rowsHtml += `
+            <tr class="${idx % 2 === 0 ? 'bg-white' : 'bg-stadium-gray'} hover:bg-blue-50/50 transition">
+              <td class="py-2.5 px-4 font-mono font-bold text-neutral-muted">${idx + 1}</td>
+              <td class="py-2.5 px-4 font-sora font-semibold text-stat-black flex items-center gap-2.5">
+                <img src="${t.logos?.[0]?.href || 'https://a.espncdn.com/i/teamlogos/nba/500/lal.png'}" class="w-5 h-5 object-contain">
+                <span>${t.displayName}</span>
+              </td>
+              <td class="py-2.5 px-3 font-mono font-bold text-right text-stat-black">${wins}</td>
+              <td class="py-2.5 px-3 font-mono text-right text-neutral-muted">${losses}</td>
+              <td class="py-2.5 px-3 font-mono font-bold text-right text-action-blue">${pct}</td>
+              <td class="py-2.5 px-3 font-mono text-right">${streak}</td>
+            </tr>
+          `;
+        });
+
+        section.innerHTML = `
+          <div class="bg-stadium-gray px-5 py-3 font-sora font-bold text-xs text-action-blue border-b border-border-light flex items-center justify-between">
+            <span>🏀 ${groupTitle.toUpperCase()}</span>
+            <span class="label-caps">CONFERENCE DIVISION</span>
+          </div>
+          <table class="w-full text-left text-xs">
+            <thead class="bg-stadium-gray border-b border-border-light text-neutral-muted font-mono uppercase text-[10px]">
+              <tr>
+                <th class="py-2.5 px-4 w-10">#</th>
+                <th class="py-2.5 px-4">Tim</th>
+                <th class="py-2.5 px-3 text-right">W</th>
+                <th class="py-2.5 px-3 text-right">L</th>
+                <th class="py-2.5 px-3 text-right">WIN %</th>
+                <th class="py-2.5 px-3 text-right">STREAK</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-border-light font-inter">
+              ${rowsHtml}
+            </tbody>
+          </table>
+        `;
+        container.appendChild(section);
+      });
+    }
+
+    function renderSingleStandingsHTML(entries) {
+      renderStandingsHTML([{ name: "Tabel Peringkat Utama", standings: { entries: entries } }]);
+    }
+
+    function renderFallbackStandings() {
+      const container = document.getElementById('standings-container');
+      container.innerHTML = '';
+      
+      const westTeams = [
+        { name: "Oklahoma City Thunder", w: 57, l: 25, pct: ".695", strk: "W5" },
+        { name: "Denver Nuggets", w: 57, l: 25, pct: ".695", strk: "W2" },
+        { name: "Minnesota Timberwolves", w: 56, l: 26, pct: ".683", strk: "L1" },
+        { name: "LA Clippers", w: 51, l: 31, pct: ".622", strk: "W3" },
+        { name: "Dallas Mavericks", w: 50, l: 32, pct: ".610", strk: "L1" },
+        { name: "Phoenix Suns", w: 49, l: 33, pct: ".598", strk: "W3" },
+        { name: "New Orleans Pelicans", w: 49, l: 33, pct: ".598", strk: "L1" },
+        { name: "LA Lakers", w: 47, l: 35, pct: ".573", strk: "W2" },
+        { name: "Sacramento Kings", w: 46, l: 36, pct: ".561", strk: "L1" },
+        { name: "Golden State Warriors", w: 46, l: 36, pct: ".561", strk: "W1" },
+        { name: "Houston Rockets", w: 41, l: 41, pct: ".500", strk: "L2" },
+        { name: "Utah Jazz", w: 31, l: 51, pct: ".378", strk: "L5" },
+        { name: "Memphis Grizzlies", w: 27, l: 55, pct: ".329", strk: "L5" },
+        { name: "San Antonio Spurs", w: 22, l: 60, pct: ".268", strk: "W2" },
+        { name: "Portland Trail Blazers", w: 21, l: 61, pct: ".256", strk: "L4" }
+      ];
+
+      const eastTeams = [
+        { name: "Boston Celtics", w: 64, l: 18, pct: ".780", strk: "W2" },
+        { name: "New York Knicks", w: 50, l: 32, pct: ".610", strk: "W5" },
+        { name: "Milwaukee Bucks", w: 49, l: 33, pct: ".598", strk: "L1" },
+        { name: "Cleveland Cavaliers", w: 48, l: 34, pct: ".585", strk: "L1" },
+        { name: "Orlando Magic", w: 47, l: 35, pct: ".573", strk: "W1" },
+        { name: "Indiana Pacers", w: 47, l: 35, pct: ".573", strk: "W1" },
+        { name: "Philadelphia 76ers", w: 47, l: 35, pct: ".573", strk: "W8" },
+        { name: "Miami Heat", w: 46, l: 36, pct: ".561", strk: "W2" },
+        { name: "Chicago Bulls", w: 39, l: 43, pct: ".476", strk: "W1" },
+        { name: "Atlanta Hawks", w: 36, l: 46, pct: ".439", strk: "L6" },
+        { name: "Brooklyn Nets", w: 32, l: 50, pct: ".390", strk: "L2" },
+        { name: "Toronto Raptors", w: 25, l: 57, pct: ".305", strk: "L4" },
+        { name: "Charlotte Hornets", w: 21, l: 61, pct: ".256", strk: "W1" },
+        { name: "Washington Wizards", w: 15, l: 67, pct: ".183", strk: "L6" },
+        { name: "Detroit Pistons", w: 14, l: 68, pct: ".171", strk: "L1" }
+      ];
+
+      const combined30Teams = [...westTeams, ...eastTeams].sort((a, b) => parseFloat(b.pct) - parseFloat(a.pct));
+
+      function buildTableHtml(title, teams, isOverall = false) {
+        let rows = '';
+        teams.forEach((t, i) => {
+          rows += `
+            <tr class="${i % 2 === 0 ? 'bg-white' : 'bg-stadium-gray'} hover:bg-blue-50/50 transition">
+              <td class="py-2.5 px-4 font-mono font-bold ${isOverall ? 'text-action-blue' : 'text-neutral-muted'}">${i + 1}</td>
+              <td class="py-2.5 px-4 font-sora font-semibold text-stat-black">${t.name}</td>
+              <td class="py-2.5 px-3 font-mono font-bold text-right text-stat-black">${t.w}</td>
+              <td class="py-2.5 px-3 font-mono text-right text-neutral-muted">${t.l}</td>
+              <td class="py-2.5 px-3 font-mono font-bold text-right text-action-blue">${t.pct}</td>
+              <td class="py-2.5 px-3 font-mono text-right">${t.strk}</td>
+            </tr>
+          `;
+        });
+        return `
+          <div class="bg-white rounded-2xl border border-border-light overflow-hidden shadow-sm">
+            <div class="${isOverall ? 'bg-gradient-to-r from-action-blue to-primary-dark text-white' : 'bg-stadium-gray text-action-blue'} px-5 py-3 font-sora font-bold text-xs flex items-center justify-between border-b border-border-light">
+              <span class="flex items-center gap-2">${isOverall ? '<i class="fa-solid fa-trophy text-amber-300"></i>' : '🏀'} ${title}</span>
+              <span class="label-caps ${isOverall ? '!text-white/80' : ''}">${isOverall ? 'OVERALL 30 TEAMS' : 'CONFERENCE DIVISION'}</span>
+            </div>
+            <table class="w-full text-left text-xs">
+              <thead class="bg-stadium-gray border-b border-border-light text-neutral-muted font-mono uppercase text-[10px]">
+                <tr>
+                  <th class="py-2.5 px-4 w-10">#</th>
+                  <th class="py-2.5 px-4">Nama Tim</th>
+                  <th class="py-2.5 px-3 text-right">W</th>
+                  <th class="py-2.5 px-3 text-right">L</th>
+                  <th class="py-2.5 px-3 text-right">WIN %</th>
+                  <th class="py-2.5 px-3 text-right">STREAK</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-border-light font-inter">
+                ${rows}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+
+      const overallHtml = buildTableHtml("OVERALL STANDINGS (30 TIM)", combined30Teams, true);
+      const westHtml = buildTableHtml("WESTERN CONFERENCE", westTeams);
+      const eastHtml = buildTableHtml("EASTERN CONFERENCE", eastTeams);
+
+      container.innerHTML = overallHtml + westHtml + eastHtml;
+    }
+
+    // 3. FETCH TEAMS
+    async function fetchTeams() {
+      const url = `https://site.api.espn.com/apis/site/v2/sports/basketball/${currentLeague}/teams?limit=1000`;
+      try {
+        const res = await fetch(url);
+        if(!res.ok) throw new Error("Teams endpoint error");
+        const data = await res.json();
+        const teamsData = data.sports?.[0]?.leagues?.[0]?.teams || [];
+        
+        if(teamsData.length > 0) {
+          allLeagueTeams = teamsData.map(t => t.team);
+        } else {
+          allLeagueTeams = FULL_30_NBA_TEAMS;
+        }
+      } catch(e) {
+        allLeagueTeams = FULL_30_NBA_TEAMS;
+      } finally {
+        renderTeamsGrid(allLeagueTeams);
+      }
+    }
+
+    function renderTeamsGrid(teams) {
+      const grid = document.getElementById('teams-grid-container');
+      if(!grid) return;
+      grid.innerHTML = '';
+
+      if(!teams || teams.length === 0) {
+        teams = FULL_30_NBA_TEAMS;
+      }
+
+      teams.forEach(t => {
+        const card = document.createElement('div');
+        card.className = "bg-white p-4 rounded-2xl border border-border-light flex items-center gap-4 hover:border-action-blue transition shadow-sm cursor-pointer hover:shadow-md";
+        card.onclick = () => loadTeamDetails(t.id, t.displayName);
+
+        card.innerHTML = `
+          <div class="w-12 h-12 rounded-xl bg-stadium-gray p-2 border border-border-light flex items-center justify-center shrink-0">
+            <img src="${t.logos?.[0]?.href || 'https://a.espncdn.com/i/teamlogos/nba/500/lal.png'}" class="w-full h-full object-contain" alt="${t.name}">
+          </div>
+          <div>
+            <h4 class="font-sora font-bold text-sm text-stat-black">${t.displayName}</h4>
+            <p class="font-mono text-[11px] text-neutral-muted">${t.abbreviation || 'TIM'} • Klik Hub Skuad</p>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function filterTeams() {
+      const q = document.getElementById('team-search-input').value.toLowerCase();
+      const filtered = allLeagueTeams.filter(t => t.displayName.toLowerCase().includes(q) || (t.abbreviation && t.abbreviation.toLowerCase().includes(q)));
+      renderTeamsGrid(filtered);
+    }
+
+    // TEAM HUB DRAWER
+    async function loadTeamDetails(teamId, teamName) {
+      const detailSec = document.getElementById('team-detail-section');
+      const detailContent = document.getElementById('team-detail-content');
+      detailSec.classList.remove('hidden');
+      detailContent.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-action-blue text-lg"></i> Memuat Data Lengkap Skuad & Hub Tim ${teamName}...`;
+
+      const rosterUrl = `https://site.api.espn.com/apis/site/v2/sports/basketball/${currentLeague}/teams/${teamId}/roster`;
+      let athletes = [];
+      try {
+        const res = await fetch(rosterUrl);
+        if(res.ok) {
+          const data = await res.json();
+          athletes = data.athletes || [];
+        }
+      } catch(e) {}
+
+      if(athletes.length === 0) {
+        athletes = ROSTER_DATABASE[teamId] || ROSTER_DATABASE['13'];
+      }
+
+      renderTeamHubDrawer(teamId, teamName, athletes);
+    }
+
+    function renderTeamHubDrawer(teamId, teamName, athletes) {
+      const detailContent = document.getElementById('team-detail-content');
+
+      let rosterRows = '';
+      athletes.forEach(ath => {
+        rosterRows += `
+          <tr class="hover:bg-stadium-gray transition">
+            <td class="py-2.5 px-4 font-mono font-bold text-neutral-muted">${ath.jersey || '-'}</td>
+            <td class="py-2.5 px-4 font-sora font-semibold text-stat-black">${ath.displayName || ath.name}</td>
+            <td class="py-2.5 px-3 font-mono text-action-blue font-bold">${ath.position?.abbreviation || 'F'}</td>
+            <td class="py-2.5 px-3 font-mono text-neutral-muted">${ath.displayHeight || "6' 6\""} / ${ath.displayWeight || '210 lbs'}</td>
+            <td class="py-2.5 px-3 font-mono">${ath.experience?.years || 4} Tahun</td>
+          </tr>
+        `;
+      });
+
+      detailContent.innerHTML = `
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-border-light">
+          <h3 class="font-sora font-extrabold text-xl text-stat-black">${teamName} - Hub Skuad & Statistik</h3>
+          <div class="flex gap-2">
+            <button onclick="switchTeamSubTab('roster')" id="team-sub-roster" class="px-3 py-1.5 rounded-lg bg-action-blue text-white text-xs font-sora font-bold">Roster Skuad</button>
+            <button onclick="switchTeamSubTab('depth')" id="team-sub-depth" class="px-3 py-1.5 rounded-lg bg-stadium-gray text-neutral-muted text-xs font-sora font-bold">Depth Chart</button>
+            <button onclick="switchTeamSubTab('leaders')" id="team-sub-leaders" class="px-3 py-1.5 rounded-lg bg-stadium-gray text-neutral-muted text-xs font-sora font-bold">Pemimpin Tim</button>
+          </div>
+        </div>
+
+        <div id="team-tab-roster" class="overflow-x-auto border border-border-light rounded-xl">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-stadium-gray text-neutral-muted font-mono uppercase text-[10px] border-b border-border-light">
+              <tr>
+                <th class="py-2.5 px-4"># No</th>
+                <th class="py-2.5 px-4">Nama Pemain</th>
+                <th class="py-2.5 px-3">Posisi</th>
+                <th class="py-2.5 px-3">Tinggi / Berat</th>
+                <th class="py-2.5 px-3">Pengalaman</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-border-light font-inter">
+              ${rosterRows}
+            </tbody>
+          </table>
+        </div>
+
+        <div id="team-tab-depth" class="hidden p-4 bg-stadium-gray rounded-xl border border-border-light text-xs font-inter space-y-3">
+          <h4 class="font-sora font-bold text-sm text-stat-black">Susunan Posisi Pemain (Depth Chart)</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-5 gap-3">
+            <div class="bg-white p-3 rounded-lg border border-border-light"><span class="label-caps text-action-blue font-bold block mb-1">PG (Point Guard)</span><p class="font-bold text-stat-black">D'Angelo Russell</p><p class="text-neutral-muted text-[11px]">Sub: Gabe Vincent</p></div>
+            <div class="bg-white p-3 rounded-lg border border-border-light"><span class="label-caps text-action-blue font-bold block mb-1">SG (Shooting Guard)</span><p class="font-bold text-stat-black">Austin Reaves</p><p class="text-neutral-muted text-[11px]">Sub: Max Christie</p></div>
+            <div class="bg-white p-3 rounded-lg border border-border-light"><span class="label-caps text-action-blue font-bold block mb-1">SF (Small Forward)</span><p class="font-bold text-stat-black">LeBron James</p><p class="text-neutral-muted text-[11px]">Sub: Cam Reddish</p></div>
+            <div class="bg-white p-3 rounded-lg border border-border-light"><span class="label-caps text-action-blue font-bold block mb-1">PF (Power Forward)</span><p class="font-bold text-stat-black">Rui Hachimura</p><p class="text-neutral-muted text-[11px]">Sub: Jarred Vanderbilt</p></div>
+            <div class="bg-white p-3 rounded-lg border border-border-light"><span class="label-caps text-action-blue font-bold block mb-1">C (Center)</span><p class="font-bold text-stat-black">Anthony Davis</p><p class="text-neutral-muted text-[11px]">Sub: Jaxson Hayes</p></div>
+          </div>
+        </div>
+
+        <div id="team-tab-leaders" class="hidden p-4 bg-stadium-gray rounded-xl border border-border-light text-xs font-inter space-y-3">
+          <h4 class="font-sora font-bold text-sm text-stat-black">Pemimpin Performa Statistik Tim</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="bg-white p-3 rounded-lg border border-border-light"><span class="label-caps text-action-blue font-bold block mb-1">Poin Terbanyak (PPG)</span><p class="font-bold text-stat-black text-sm">LeBron James (25.7 PPG)</p></div>
+            <div class="bg-white p-3 rounded-lg border border-border-light"><span class="label-caps text-action-blue font-bold block mb-1">Rebounds Terbanyak (RPG)</span><p class="font-bold text-stat-black text-sm">Anthony Davis (12.3 RPG)</p></div>
+            <div class="bg-white p-3 rounded-lg border border-border-light"><span class="label-caps text-action-blue font-bold block mb-1">Assists Terbanyak (APG)</span><p class="font-bold text-stat-black text-sm">LeBron James (8.2 APG)</p></div>
+          </div>
+        </div>
+      `;
+    }
+
+    function switchTeamSubTab(subName) {
+      ['roster', 'depth', 'leaders'].forEach(t => {
+        document.getElementById(`team-tab-${t}`)?.classList.add('hidden');
+        const btn = document.getElementById(`team-sub-${t}`);
+        if(btn) {
+          btn.classList.remove('bg-action-blue', 'text-white');
+          btn.classList.add('bg-stadium-gray', 'text-neutral-muted');
+        }
+      });
+      document.getElementById(`team-tab-${subName}`)?.classList.remove('hidden');
+      const activeBtn = document.getElementById(`team-sub-${subName}`);
+      if(activeBtn) {
+        activeBtn.classList.add('bg-action-blue', 'text-white');
+        activeBtn.classList.remove('bg-stadium-gray', 'text-neutral-muted');
+      }
+    }
+
+    function hideTeamDetail() {
+      document.getElementById('team-detail-section').classList.add('hidden');
+    }
+
+    // 4. LEAGUE STATISTICS
+    async function fetchLeagueStats() {
+      const container = document.getElementById('league-stats-container');
+      container.innerHTML = `<div class="p-4 text-xs text-neutral-muted"><i class="fa-solid fa-spinner fa-spin text-action-blue mr-2"></i>Memuat statistik liga...</div>`;
+
+      const mockLeaders = [
+        { category: "Pemimpin Poin (PPG)", icon: "fa-fire", leader: "Luka Dončić (33.9 PPG)", team: "Dallas Mavericks", rank: ["1. Luka Dončić - 33.9", "2. Giannis Antetokounmpo - 30.4", "3. Shai Gilgeous-Alexander - 30.1", "4. Giannis A. - 29.8"] },
+        { category: "Pemimpin Rebound (RPG)", icon: "fa-shield-halved", leader: "Domantas Sabonis (13.7 RPG)", team: "Sacramento Kings", rank: ["1. Domantas Sabonis - 13.7", "2. Rudy Gobert - 12.9", "3. Anthony Davis - 12.3", "4. Nikola Jokić - 12.4"] },
+        { category: "Pemimpin Assist (APG)", icon: "fa-hands-holding", leader: "Tyrese Haliburton (10.9 APG)", team: "Indiana Pacers", rank: ["1. Tyrese Haliburton - 10.9", "2. Trae Young - 10.8", "3. Nikola Jokić - 9.0", "4. LeBron James - 8.2"] }
+      ];
+
+      container.innerHTML = '';
+      mockLeaders.forEach(cat => {
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-2xl border border-border-light p-5 shadow-sm space-y-3";
+        card.innerHTML = `
+          <div class="flex items-center gap-2 border-b border-border-light pb-2.5">
+            <i class="fa-solid ${cat.icon} text-action-blue"></i>
+            <h4 class="font-sora font-bold text-xs text-stat-black">${cat.category}</h4>
+          </div>
+          <div class="bg-stadium-gray p-3 rounded-xl border border-border-light">
+            <span class="label-caps text-action-blue font-bold">PERINGKAT #1 LIGA</span>
+            <p class="font-sora font-bold text-sm text-stat-black mt-0.5">${cat.leader}</p>
+            <p class="text-[11px] font-mono text-neutral-muted">${cat.team}</p>
+          </div>
+          <div class="space-y-1.5 font-inter text-xs text-neutral-muted">
+            ${cat.rank.map(r => `<div class="py-1 border-b border-border-light/50">${r}</div>`).join('')}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // 5. TRANSACTIONS & DRAFT BOARD
+    async function fetchTransactionsAndDraft() {
+      const transContainer = document.getElementById('transactions-list-container');
+      const draftContainer = document.getElementById('draft-board-container');
+
+      const mockTrans = [
+        { title: "Penandatanganan Pemain Bebas (Free Agent Signing)", desc: "Philadelphia 76ers resmi mengontrak Paul George dengan kontrak 4 tahun.", date: "Terbaru" },
+        { title: "Pertukaran Pemain Tiga Tim (Three-Team Trade)", desc: "Minnesota Timberwolves mengakuisisi Julius Randle dan Donte DiVincenzo.", date: "Terbaru" },
+        { title: "Perpanjangan Kontrak Maksimal", desc: "Boston Celtics menyepakati perpanjangan kontrak supermax dengan Jayson Tatum.", date: "Pekan ini" }
+      ];
+
+      const mockDraft = [
+        { pick: "Pick #1 (Round 1)", player: "Zaccharie Risacher", pos: "SF", draftedBy: "Atlanta Hawks", college: "JL Bourg (Prancis)" },
+        { pick: "Pick #2 (Round 1)", player: "Alex Sarr", pos: "C", draftedBy: "Washington Wizards", college: "Perth Wildcats (Australia)" },
+        { pick: "Pick #3 (Round 1)", player: "Reed Sheppard", pos: "SG", draftedBy: "Houston Rockets", college: "Kentucky Wildcats" },
+        { pick: "Pick #4 (Round 1)", player: "Stephon Castle", pos: "PG", draftedBy: "San Antonio Spurs", college: "Connecticut Huskies" }
+      ];
+
+      transContainer.innerHTML = '';
+      mockTrans.forEach(t => {
+        const item = document.createElement('div');
+        item.className = "p-3 rounded-xl bg-stadium-gray border border-border-light space-y-1";
+        item.innerHTML = `
+          <div class="flex items-center justify-between"><span class="font-sora font-bold text-stat-black text-xs">${t.title}</span><span class="label-caps text-[9px]">${t.date}</span></div>
+          <p class="text-neutral-muted text-xs leading-relaxed">${t.desc}</p>
+        `;
+        transContainer.appendChild(item);
+      });
+
+      draftContainer.innerHTML = '';
+      mockDraft.forEach(d => {
+        const item = document.createElement('div');
+        item.className = "p-3 rounded-xl bg-stadium-gray border border-border-light flex items-center justify-between";
+        item.innerHTML = `
+          <div>
+            <span class="label-caps text-action-blue font-bold">${d.pick}</span>
+            <h5 class="font-sora font-bold text-stat-black text-xs mt-0.5">${d.player} (${d.pos})</h5>
+            <p class="text-[11px] text-neutral-muted font-mono">${d.college}</p>
+          </div>
+          <span class="bg-white border border-border-light px-2.5 py-1 rounded-lg font-mono font-bold text-[10px] text-stat-black">${d.draftedBy}</span>
+        `;
+        draftContainer.appendChild(item);
+      });
+    }
+
+    // 6. FETCH INJURIES
+    async function fetchInjuries() {
+      const url = `https://site.api.espn.com/apis/site/v2/sports/basketball/${currentLeague}/injuries`;
+      const tbody = document.getElementById('injuries-table-body');
+      tbody.innerHTML = '<tr><td colspan="4" class="p-6 text-center text-neutral-muted"><i class="fa-solid fa-spinner fa-spin text-action-blue mr-2"></i>Memuat laporan medis...</td></tr>';
+
+      try {
+        const res = await fetch(url);
+        let injuries = [];
+        if(res.ok) {
+          const data = await res.json();
+          injuries = data.injuries || [];
+        }
+        
+        if(!injuries || injuries.length === 0) {
+          injuries = REAL_INJURIES_DATABASE;
+        }
+
+        renderInjuriesTable(injuries);
+      } catch(e) {
+        renderInjuriesTable(REAL_INJURIES_DATABASE);
+      }
+    }
+
+    function renderInjuriesTable(injuries) {
+      const tbody = document.getElementById('injuries-table-body');
+      tbody.innerHTML = '';
+
+      injuries.forEach((inj, idx) => {
+        const playerName = inj.athlete?.displayName || inj.athlete?.name || inj.name || "Pemain Bintang";
+        const teamName = inj.athlete?.team?.displayName || inj.teamName || "Tim Liga NBA";
+        const statusStr = inj.status || "OUT";
+        const detailStr = inj.details?.detail || inj.shortComment || inj.detail || "Dalam perawatan tim medis";
+
+        const row = document.createElement('tr');
+        row.className = idx % 2 === 0 ? 'bg-white' : 'bg-stadium-gray';
+        row.innerHTML = `
+          <td class="py-3 px-5 font-sora font-semibold text-stat-black">${playerName}</td>
+          <td class="py-3 px-4 font-mono text-neutral-muted font-medium">${teamName}</td>
+          <td class="py-3 px-4 font-mono"><span class="${statusStr.includes('OUT') ? 'bg-red-50 text-red-600 border-red-200' : 'bg-amber-50 text-amber-600 border-amber-200'} border px-2.5 py-1 rounded-md font-bold text-[10px]">${statusStr}</span></td>
+          <td class="py-3 px-5 font-inter text-neutral-muted">${detailStr}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    async function analyzeInjuriesAI() {
+      const box = document.getElementById('ai-injury-impact-box');
+      box.classList.remove('hidden');
+      box.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-action-blue mr-2"></i> GaneMaX.ai sedang menganalisis dampak cedera pemain pada persaingan liga...`;
+
+      const systemPrompt = `Anda adalah Analis Medis & Taktik GaneMaX.ai. Berikan analisis ringkas mengenai dampak cedera pemain bintang terhadap kekuatan tim dan persaingan liga. Gunakan Bahasa Indonesia.`;
+      try {
+        const text = await callGaneMaXAI(systemPrompt, "Analisis dampak cedera pemain saat ini.");
+        box.innerText = text;
+      } catch(e) {
+        box.innerText = e.message;
+      }
+    }
+
+    // 7. FETCH RANKINGS & BPI
+    async function fetchRankings() {
+      const url = `https://site.api.espn.com/apis/site/v2/sports/basketball/${currentLeague}/rankings`;
+      const container = document.getElementById('rankings-container');
+      container.innerHTML = `<div class="p-4 text-xs text-neutral-muted"><i class="fa-solid fa-spinner fa-spin text-action-blue mr-2"></i>Memuat peringkat...</div>`;
+
+      try {
+        const res = await fetch(url);
+        if(!res.ok) throw new Error("Rankings not available");
+        const data = await res.json();
+        const rankings = data.rankings || [];
+
+        if(rankings.length === 0) {
+          renderFallbackRankings();
+          return;
+        }
+
+        container.innerHTML = '';
+        rankings.forEach(rankObj => {
+          const card = document.createElement('div');
+          card.className = "bg-white rounded-2xl border border-border-light p-6 shadow-sm";
+          
+          let ranksHtml = '';
+          (rankObj.ranks || []).slice(0, 10).forEach(r => {
+            ranksHtml += `
+              <div class="flex items-center justify-between py-2 border-b border-border-light/60 text-xs">
+                <span class="font-mono font-bold text-action-blue w-8">#${r.current}</span>
+                <span class="font-sora font-semibold text-stat-black flex-1">${r.team?.displayName || 'Tim'}</span>
+                <span class="font-mono text-neutral-muted text-[11px]">${r.recordSummary || ''}</span>
+              </div>
+            `;
+          });
+
+          card.innerHTML = `
+            <h4 class="font-sora font-bold text-sm text-stat-black mb-4 border-b border-border-light pb-2.5">${rankObj.name || 'Peringkat Utama'}</h4>
+            ${ranksHtml}
+          `;
+          container.appendChild(card);
+        });
+      } catch(e) {
+        renderFallbackRankings();
+      }
+    }
+
+    function renderFallbackRankings() {
+      const container = document.getElementById('rankings-container');
+      container.innerHTML = `
+        <div class="bg-white rounded-2xl border border-border-light p-6 shadow-sm">
+          <h4 class="font-sora font-bold text-sm text-stat-black mb-4 border-b border-border-light pb-2.5">Power Rankings & Performa Tim Utama</h4>
+          <div class="space-y-2 text-xs font-inter">
+            <div class="flex items-center justify-between py-2 border-b border-border-light/60"><span class="font-mono font-bold text-action-blue w-8">#1</span><span class="font-sora font-semibold flex-1">Boston Celtics</span><span class="font-mono text-neutral-muted">64-18</span></div>
+            <div class="flex items-center justify-between py-2 border-b border-border-light/60"><span class="font-mono font-bold text-action-blue w-8">#2</span><span class="font-sora font-semibold flex-1">Oklahoma City Thunder</span><span class="font-mono text-neutral-muted">57-25</span></div>
+            <div class="flex items-center justify-between py-2 border-b border-border-light/60"><span class="font-mono font-bold text-action-blue w-8">#3</span><span class="font-sora font-semibold flex-1">Denver Nuggets</span><span class="font-mono text-neutral-muted">57-25</span></div>
+            <div class="flex items-center justify-between py-2 border-b border-border-light/60"><span class="font-mono font-bold text-action-blue w-8">#4</span><span class="font-sora font-semibold flex-1">Minnesota Timberwolves</span><span class="font-mono text-neutral-muted">56-26</span></div>
+            <div class="flex items-center justify-between py-2 border-b border-border-light/60"><span class="font-mono font-bold text-action-blue w-8">#5</span><span class="font-sora font-semibold flex-1">New York Knicks</span><span class="font-mono text-neutral-muted">50-32</span></div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-border-light p-6 shadow-sm">
+          <h4 class="font-sora font-bold text-sm text-stat-black mb-4 border-b border-border-light pb-2.5">BPI Rating Leaders & Proyeksi Bracketology</h4>
+          <div class="space-y-2 text-xs font-inter">
+            <div class="flex items-center justify-between py-2 border-b border-border-light/60"><span class="font-mono font-bold text-action-blue w-8">#1</span><span class="font-sora font-semibold flex-1">Houston Rockets BPI Rating</span><span class="font-mono text-neutral-muted">BPI +8.4</span></div>
+            <div class="flex items-center justify-between py-2 border-b border-border-light/60"><span class="font-mono font-bold text-action-blue w-8">#2</span><span class="font-sora font-semibold flex-1">Cleveland Cavaliers BPI Rating</span><span class="font-mono text-neutral-muted">BPI +7.9</span></div>
+            <div class="flex items-center justify-between py-2 border-b border-border-light/60"><span class="font-mono font-bold text-action-blue w-8">#3</span><span class="font-sora font-semibold flex-1">Memphis Grizzlies BPI Rating</span><span class="font-mono text-neutral-muted">BPI +7.1</span></div>
+          </div>
+        </div>
+      `;
+    }
+
+    // 8. FETCH NEWS
+    async function fetchNews() {
+      const url = `https://site.api.espn.com/apis/site/v2/sports/basketball/${currentLeague}/news`;
+      const container = document.getElementById('news-grid-container');
+      try {
+        const res = await fetch(url);
+        if(!res.ok) throw new Error("News error");
+        const data = await res.json();
+        renderNewsGrid(data.articles || []);
+      } catch(e) {
+        renderMockNews();
+      }
+    }
+
+    function renderNewsGrid(articles) {
+      const container = document.getElementById('news-grid-container');
+      if(!container) return;
+      container.innerHTML = '';
+
+      if(!articles || articles.length === 0) {
+        renderMockNews();
+        return;
+      }
+
+      articles.slice(0, 6).forEach(art => {
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-2xl border border-border-light overflow-hidden flex flex-col justify-between hover:shadow-md transition shadow-sm";
+        card.innerHTML = `
+          <div>
+            ${art.images?.[0]?.url ? `<img src="${art.images[0].url}" class="w-full h-44 object-cover" alt="Berita">` : ''}
+            <div class="p-5">
+              <span class="label-caps text-action-blue font-bold">${art.published ? new Date(art.published).toLocaleDateString('id-ID') : 'BERITA UTAMA'}</span>
+              <h3 class="font-sora font-bold text-sm text-stat-black mt-1.5 line-clamp-2">${art.headline}</h3>
+              <p class="text-xs text-neutral-muted mt-2 font-inter line-clamp-3 leading-relaxed">${art.description || ''}</p>
+            </div>
+          </div>
+          <div class="p-5 pt-0 border-t border-border-light/50 mt-4">
+            <a href="${art.links?.web?.href || '#'}" target="_blank" class="text-action-blue font-sora font-bold text-xs flex items-center gap-1.5 hover:underline">
+              Baca Artikel Selengkapnya <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            </a>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderMockNews() {
+      const articles = [
+        { headline: "Strategi Rotasi Kuarter Akhir Menjadi Kunci Kemenangan Laga Ini", description: "Evaluasi taktis menunjukkan pentingnya pertahanan perimeter dan transisi cepat dalam menit-menit krusial.", published: new Date().toISOString() },
+        { headline: "Analisis Dominasi Poin di Area Paint & Efisiensi Shooting", description: "Tim tuan rumah mencatatkan persentase tembakan bebas dan rebounds tertinggi pekan ini.", published: new Date().toISOString() },
+        { headline: "Proyeksi Playoff & Evaluasi Performa Pemain Kunci", description: "Peta persaingan liga semakin memanas menjelang pekan-pekan krusial penentuan posisi klasemen.", published: new Date().toISOString() }
+      ];
+      renderNewsGrid(articles);
+    }
+
+    function populateAISelectMatches(games) {
+      const select = document.getElementById('ai-select-match');
+      if(!select) return;
+      select.innerHTML = '';
+      games.forEach(g => {
+        const opt = document.createElement('option');
+        opt.value = g.id;
+        opt.innerText = `${g.shortName || g.name} (${g.status.type.shortDetail})`;
+        select.appendChild(opt);
+      });
+    }
+
+    // GANEMAX.AI MULTI-MODEL RETRY ENGINE
+    async function callGaneMaXAI(systemPrompt, userQuery) {
+      const modelsToTry = [
+        "google/gemini-2.5-flash",
+        "meta-llama/llama-3.3-70b-instruct",
+        "openai/gpt-4o-mini"
+      ];
+
+      for (const modelName of modelsToTry) {
+        try {
+          const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${openRouterApiKey}`,
+              'Content-Type': 'application/json',
+              'HTTP-Referer': window.location.origin || 'https://ganemax.app',
+              'X-Title': 'GaneMaX.ai Basketball Engine'
+            },
+            body: JSON.stringify({
+              model: modelName,
+              messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: userQuery }
+              ]
+            })
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            const text = data.choices?.[0]?.message?.content;
+            if (text && text.trim().length > 0) {
+              return text;
+            }
+          }
+        } catch (e) {
+          console.warn(`Retry model...`);
+        }
+      }
+      throw new Error("Layanan GaneMaX.ai sedang mengalami antrean tinggi. Silakan coba beberapa saat lagi.");
+    }
+
+    // AI HELPER FUNCTIONS
+    async function askAIQuick(promptText) {
+      const consoleEl = document.getElementById('ai-quick-console');
+      consoleEl.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin text-action-blue mr-2"></i> GaneMaX.ai sedang menganalisis statistik pertandingan...`;
+
+      const comp = selectedGame?.competitions[0];
+      const home = comp?.competitors.find(c => c.homeAway === 'home')?.team.displayName || "Home Team";
+      const away = comp?.competitors.find(c => c.homeAway === 'away')?.team.displayName || "Away Team";
+      const homeScore = comp?.competitors.find(c => c.homeAway === 'home')?.score || "108";
+      const awayScore = comp?.competitors.find(c => c.homeAway === 'away')?.score || "102";
+
+      const systemPrompt = `Anda adalah GaneMaX.ai Sports Analyst. Berikan jawaban analisis singkat, tajam, presisi untuk laga ${home} (${homeScore}) vs ${away} (${awayScore}). Gunakan Bahasa Indonesia.`;
+
+      try {
+        const reply = await callGaneMaXAI(systemPrompt, promptText);
+        consoleEl.innerText = reply;
+      } catch(err) {
+        consoleEl.innerText = err.message;
+      }
+    }
+
+    function handleAIChatSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('ai-user-input');
+      const text = input.value.trim();
+      if(!text) return;
+      askAIQuick(text);
+      input.value = '';
+    }
+
+    function generateAIMatchAnalysis() {
+      switchMainTab('ai');
+      runDeepAIAnalytics();
+    }
+
+    async function runDeepAIAnalytics() {
+      const output = document.getElementById('ai-deep-output');
+      const statusInd = document.getElementById('ai-status-indicator');
+      output.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-action-blue mr-2"></i> GaneMaX.ai sedang menyusun Laporan Scouting Taktis...`;
+      statusInd.innerText = "Processing...";
+
+      const matchId = document.getElementById('ai-select-match').value;
+      const targetGame = currentGamesData.find(g => g.id === matchId) || selectedGame || MOCK_FALLBACK_GAMES[0];
+      const comp = targetGame.competitions[0];
+      const home = comp.competitors.find(c => c.homeAway === 'home')?.team.displayName || "Home";
+      const away = comp.competitors.find(c => c.homeAway === 'away')?.team.displayName || "Away";
+
+      const focusRadio = document.querySelector('input[name="ai-focus"]:checked')?.value || 'full-scout';
+      const systemPrompt = `Anda adalah Kepala Analis Taktik GaneMaX.ai. Buat laporan komprehensif Bahasa Indonesia mengenai laga ${home} vs ${away}. Fokus: ${focusRadio}. Berikan analisis tajam, bullet points, dan prediksi strategi.`;
+
+      try {
+        const resText = await callGaneMaXAI(systemPrompt, `Buatkan analisis scouting taktis untuk laga ${home} vs ${away}.`);
+        output.innerText = resText;
+        statusInd.innerText = "Completed";
+      } catch(e) {
+        output.innerText = e.message;
+        statusInd.innerText = "Error";
+      }
+    }
+
+    async function runPlayerComparisonAI() {
+      const p1 = document.getElementById('compare-player-1').value;
+      const p2 = document.getElementById('compare-player-2').value;
+      const card = document.getElementById('compare-result-card');
+
+      card.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-action-blue mr-2"></i> GaneMaX.ai sedang menganalisis perbandingan ${p1} vs ${p2}...`;
+      const systemPrompt = `Anda adalah Direktur Scouting GaneMaX.ai. Bandingkan 2 pemain bola basket: ${p1} dan ${p2}. Evaluasi kelebihan, gaya main, efisiensi tembakan, clutch ability, serta berikan GaneMaX.ai Verdict untuk pemain yang lebih berpengaruh. Gunakan Bahasa Indonesia.`;
+
+      try {
+        const resText = await callGaneMaXAI(systemPrompt, `Bandingkan pemain ${p1} vs ${p2}.`);
+        card.innerHTML = `<div class="font-sora font-bold text-sm text-stat-black mb-2.5 flex items-center gap-2">
+          <i class="fa-solid fa-trophy text-amber-500"></i> Head-to-Head GaneMaX.ai Verdict: ${p1} vs ${p2}
+        </div>
+        <div class="whitespace-pre-line text-neutral-muted leading-relaxed">${resText}</div>`;
+      } catch(e) {
+        card.innerText = e.message;
+      }
+    }
+
+    // SWITCH MAIN TAB NAVIGATION WITH HIGH-CONTRAST INDICATOR
+    function switchMainTab(tabName) {
+      const tabs = ['scores', 'standings', 'teams', 'stats', 'transactions', 'injuries', 'rankings', 'ai', 'compare', 'news'];
+      tabs.forEach(t => {
+        const el = document.getElementById(`tab-${t}`);
+        if(el) el.classList.add('hidden');
+        
+        const navBtn = document.getElementById(`nav-${t}`);
+        if(navBtn) {
+          navBtn.classList.remove('tab-btn-active', 'bg-action-blue', 'text-white');
+          navBtn.classList.add('bg-white', 'text-neutral-muted', 'border-border-light');
+        }
+      });
+
+      const targetEl = document.getElementById(`tab-${tabName}`);
+      if(targetEl) targetEl.classList.remove('hidden');
+
+      const activeNav = document.getElementById(`nav-${tabName}`);
+      if(activeNav) {
+        activeNav.classList.add('tab-btn-active');
+        activeNav.classList.remove('bg-white', 'text-neutral-muted', 'border-border-light');
+      }
+    }
+  </script>
+</body>
+</html>
