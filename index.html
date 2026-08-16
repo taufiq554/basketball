@@ -146,7 +146,7 @@
       </div>
     </div>
 
-    <!-- DESKTOP TOP TAB NAVIGATION -->
+    <!-- DESKTOP TOP TAB NAVIGATION (11 TABS COMPREHENSIVE SUITE) -->
     <div class="hidden sm:block border-t border-border-light bg-stadium-gray px-4 py-2">
       <div class="max-w-7xl mx-auto flex overflow-x-auto gap-2 text-xs font-sora font-semibold scrollbar-none">
         <button id="nav-scores" onclick="switchMainTab('scores')" class="tab-btn tab-btn-active whitespace-nowrap px-4 py-2 rounded-xl border border-transparent flex items-center gap-2">
@@ -211,9 +211,9 @@
     </div>
   </section>
 
+  <!-- MAIN APP CONTAINER -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
     
-    <!-- TAB 1: SCORES & FEATURED MATCH -->
     <div id="tab-scores" class="space-y-4 sm:space-y-6">
       
       <div id="featured-match-card" class="bg-white rounded-2xl border border-border-light p-4 sm:p-8 shadow-card relative overflow-hidden">
@@ -297,7 +297,6 @@
         </div>
       </div>
 
-      <!-- MATCH OVERVIEW DATA GRID -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         
         <div class="lg:col-span-2 space-y-4 sm:space-y-6">
@@ -451,7 +450,6 @@
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        
         <div class="lg:col-span-2 space-y-4">
           <div class="bg-stadium-gray p-4 rounded-2xl border border-border-light flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div class="flex items-center gap-2">
@@ -528,7 +526,6 @@
             </div>
           </div>
         </div>
-
       </div>
     </div>
 
@@ -544,7 +541,6 @@
       </div>
     </div>
 
-    <!-- TAB 4: TIM & HUB SKUAD -->
     <div id="tab-teams" class="hidden space-y-4 sm:space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-stadium-gray p-4 sm:p-6 rounded-2xl border border-border-light">
         <div>
@@ -771,7 +767,6 @@
     </button>
   </nav>
 
-  <!-- CUSTOM LEAGUE SELECTION MODAL -->
   <div id="league-modal-backdrop" class="fixed inset-0 bg-stat-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl border border-border-light max-w-lg w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[85vh] flex flex-col animate-in fade-in zoom-in-95 duration-200">
       
@@ -795,7 +790,6 @@
     </div>
   </div>
 
-  <!-- ATHLETE PROFILE & STATS MODAL -->
   <div id="player-modal-backdrop" class="fixed inset-0 bg-stat-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl border border-border-light max-w-xl w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-200">
       <div class="flex items-center justify-between pb-3 border-b border-border-light">
@@ -842,6 +836,21 @@
     let selectedDate = new Date().toISOString().split('T')[0].replace(/-/g, '');
     let activeStatsFilter = "all";
     let loadedOddsData = [];
+
+    function safeSetText(id, text) {
+      const el = document.getElementById(id);
+      if (el) el.innerText = text;
+    }
+
+    function safeSetSrc(id, src) {
+      const el = document.getElementById(id);
+      if (el) el.src = src;
+    }
+
+    function safeSetHTML(id, html) {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = html;
+    }
 
     // FULL 15 LEAGUES CATALOG WITH OFFICIAL ESPN LOGOS
     const LEAGUE_CATALOG = [
@@ -972,7 +981,8 @@
 
     window.onload = function() {
       const today = new Date().toISOString().split('T')[0];
-      document.getElementById('scoreboard-date-picker').value = today;
+      const datePicker = document.getElementById('scoreboard-date-picker');
+      if (datePicker) datePicker.value = today;
       selectedDate = today.replace(/-/g, '');
 
       renderLeagueModalList();
@@ -980,11 +990,13 @@
     };
 
     function openLeagueModal() {
-      document.getElementById('league-modal-backdrop').classList.remove('hidden');
+      const modal = document.getElementById('league-modal-backdrop');
+      if (modal) modal.classList.remove('hidden');
     }
 
     function closeLeagueModal() {
-      document.getElementById('league-modal-backdrop').classList.add('hidden');
+      const modal = document.getElementById('league-modal-backdrop');
+      if (modal) modal.classList.add('hidden');
     }
 
     function renderLeagueModalList() {
@@ -1018,10 +1030,9 @@
       currentLeague = leagueId;
       const leagueObj = LEAGUE_CATALOG.find(l => l.id === leagueId);
       
-      const iconImg = document.getElementById('current-league-icon-img');
-      if(iconImg) iconImg.src = leagueObj.logo;
-      document.getElementById('current-league-display-btn').innerText = leagueObj.name;
-      document.getElementById('active-league-label').innerText = `${leagueObj.name.toUpperCase()} MATCH STREAM`;
+      safeSetSrc('current-league-icon-img', leagueObj.logo);
+      safeSetText('current-league-display-btn', leagueObj.name);
+      safeSetText('active-league-label', `${leagueObj.name.toUpperCase()} MATCH STREAM`);
       
       closeLeagueModal();
       renderLeagueModalList();
@@ -1029,7 +1040,8 @@
     }
 
     function onDateChanged() {
-      const val = document.getElementById('scoreboard-date-picker').value;
+      const datePicker = document.getElementById('scoreboard-date-picker');
+      const val = datePicker ? datePicker.value : null;
       if(val) {
         selectedDate = val.replace(/-/g, '');
         fetchScoreboard();
@@ -1038,6 +1050,7 @@
 
     function changeDate(days) {
       const picker = document.getElementById('scoreboard-date-picker');
+      if(!picker) return;
       const curDate = new Date(picker.value || new Date());
       curDate.setDate(curDate.getDate() + days);
       const formatted = curDate.toISOString().split('T')[0];
@@ -1048,7 +1061,8 @@
 
     function resetToToday() {
       const today = new Date().toISOString().split('T')[0];
-      document.getElementById('scoreboard-date-picker').value = today;
+      const picker = document.getElementById('scoreboard-date-picker');
+      if (picker) picker.value = today;
       selectedDate = today.replace(/-/g, '');
       fetchScoreboard();
     }
@@ -1157,18 +1171,18 @@
       const awayName = away.team.displayName || away.team.name;
       const awayAbbr = away.team.abbreviation || away.team.name || 'AWAY';
 
-      document.getElementById('home-team-name').innerText = homeName;
-      document.getElementById('home-team-logo').src = home.team.logo || 'https://a.espncdn.com/i/teamlogos/nba/500/lal.png';
-      document.getElementById('home-team-record').innerText = `${homeAbbr} • ${home.records?.[0]?.summary || '30-20'}`;
-      document.getElementById('home-score').innerText = home.score || 0;
+      safeSetText('home-team-name', homeName);
+      safeSetSrc('home-team-logo', home.team.logo || 'https://a.espncdn.com/i/teamlogos/nba/500/lal.png');
+      safeSetText('home-team-record', `${homeAbbr} • ${home.records?.[0]?.summary || '30-20'}`);
+      safeSetText('home-score', home.score || 0);
 
-      document.getElementById('away-team-name').innerText = awayName;
-      document.getElementById('away-team-logo').src = away.team.logo || 'https://a.espncdn.com/i/teamlogos/nba/500/gs.png';
-      document.getElementById('away-team-record').innerText = `${awayAbbr} • ${away.records?.[0]?.summary || '28-22'}`;
-      document.getElementById('away-score').innerText = away.score || 0;
+      safeSetText('away-team-name', awayName);
+      safeSetSrc('away-team-logo', away.team.logo || 'https://a.espncdn.com/i/teamlogos/nba/500/gs.png');
+      safeSetText('away-team-record', `${awayAbbr} • ${away.records?.[0]?.summary || '28-22'}`);
+      safeSetText('away-score', away.score || 0);
 
-      document.getElementById('game-arena').innerText = `${comp.venue?.fullName || 'Basketball Arena'}, ${comp.venue?.address?.city || ''}`;
-      document.getElementById('game-status-text').innerText = game.status.type.detail;
+      safeSetText('game-arena', `${comp.venue?.fullName || 'Basketball Arena'}, ${comp.venue?.address?.city || ''}`);
+      safeSetText('game-status-text', game.status.type.detail);
 
       let broadcastStr = comp.broadcasts?.map(b => b.names?.join(', ') || b.market).filter(Boolean).join(' | ');
       if (!broadcastStr) broadcastStr = "ESPN / ABC Live Broadcast";
@@ -1178,14 +1192,14 @@
 
       let oddsStr = comp.odds?.[0] ? `${comp.odds[0].details || ''} | O/U ${comp.odds[0].overUnder || ''}` : `${homeAbbr} -3.5 | O/U 224.5`;
 
-      document.getElementById('match-broadcast-text').innerText = broadcastStr;
-      document.getElementById('match-officials-text').innerText = officialsStr;
-      document.getElementById('match-odds-text').innerText = oddsStr;
+      safeSetText('match-broadcast-text', broadcastStr);
+      safeSetText('match-officials-text', officialsStr);
+      safeSetText('match-odds-text', oddsStr);
 
       renderBoxScore(MOCK_BOXSCORE);
       renderMockPlays();
 
-      document.getElementById('match-quick-insight').innerText = `Laga ${homeName} vs ${awayName} siap dianalisis oleh GaneMaX.ai.`;
+      safeSetText('match-quick-insight', `Laga ${homeName} vs ${awayName} siap dianalisis oleh GaneMaX.ai.`);
     }
 
     function renderBoxScore(players) {
@@ -1331,16 +1345,18 @@
     }
 
     function calculateOddsPayout() {
-      const stake = parseFloat(document.getElementById('calc-stake')?.value || 0);
-      const odds = parseFloat(document.getElementById('calc-odds')?.value || 1);
+      const stakeInput = document.getElementById('calc-stake');
+      const oddsInput = document.getElementById('calc-odds');
+      const stake = parseFloat(stakeInput ? stakeInput.value : 0);
+      const odds = parseFloat(oddsInput ? oddsInput.value : 1);
 
       const payout = stake * odds;
       const profit = payout - stake;
       const implied = odds > 0 ? (1 / odds) * 100 : 0;
 
-      document.getElementById('calc-payout').innerText = `Rp ${Math.round(payout).toLocaleString('id-ID')}`;
-      document.getElementById('calc-profit').innerText = `Rp ${Math.round(profit).toLocaleString('id-ID')}`;
-      document.getElementById('calc-implied').innerText = `${implied.toFixed(2)}%`;
+      safeSetText('calc-payout', `Rp ${Math.round(payout).toLocaleString('id-ID')}`);
+      safeSetText('calc-profit', `Rp ${Math.round(profit).toLocaleString('id-ID')}`);
+      safeSetText('calc-implied', `${implied.toFixed(2)}%`);
     }
 
     async function analyzeOddsValueAI() {
@@ -1378,7 +1394,7 @@
 
     async function fetchStandings() {
       const url = `https://site.api.espn.com/apis/v2/sports/basketball/${currentLeague}/standings`;
-      document.getElementById('standings-title-display').innerText = `Klasemen Resmi ${currentLeague.toUpperCase()} (Overall Standings & Konferensi)`;
+      safeSetText('standings-title-display', `Klasemen Resmi ${currentLeague.toUpperCase()} (Overall Standings & Konferensi)`);
 
       try {
         const res = await fetch(url);
@@ -1398,6 +1414,7 @@
 
     function renderStandingsFromEntries(allEntries) {
       const container = document.getElementById('standings-container');
+      if(!container) return;
       container.innerHTML = '';
 
       allEntries.sort((a, b) => {
@@ -1458,6 +1475,7 @@
 
     function renderFallbackStandings() {
       const container = document.getElementById('standings-container');
+      if(!container) return;
       container.innerHTML = '';
       
       const teams = [
@@ -1512,14 +1530,12 @@
 
     async function fetchTeams() {
       const grid = document.getElementById('teams-grid-container');
-      const heading = document.getElementById('teams-tab-heading');
-      const subheading = document.getElementById('teams-tab-subheading');
-      
       const currentLeagueObj = LEAGUE_CATALOG.find(l => l.id === currentLeague);
-      if(heading) heading.innerText = `Direktori Tim & Hub Skuad (${currentLeagueObj?.name || currentLeague})`;
-      if(subheading) subheading.innerText = `Profil Lengkap Tim, Skuad Roster, & Hub Kedalaman ${currentLeagueObj?.fullname || currentLeague}`;
+      
+      safeSetText('teams-tab-heading', `Direktori Tim & Hub Skuad (${currentLeagueObj?.name || currentLeague})`);
+      safeSetText('teams-tab-subheading', `Profil Lengkap Tim, Skuad Roster, & Hub Kedalaman ${currentLeagueObj?.fullname || currentLeague}`);
 
-      grid.innerHTML = `<div class="col-span-full p-6 text-center text-xs text-neutral-muted"><i class="fa-solid fa-spinner fa-spin text-action-blue mr-2"></i>Memuat daftar tim untuk ${currentLeagueObj?.name}...</div>`;
+      if(grid) grid.innerHTML = `<div class="col-span-full p-6 text-center text-xs text-neutral-muted"><i class="fa-solid fa-spinner fa-spin text-action-blue mr-2"></i>Memuat daftar tim untuk ${currentLeagueObj?.name}...</div>`;
 
       const url = `https://site.api.espn.com/apis/site/v2/sports/basketball/${currentLeague}/teams?limit=1000`;
       try {
@@ -1568,7 +1584,8 @@
     }
 
     function filterTeams() {
-      const q = document.getElementById('team-search-input').value.toLowerCase();
+      const input = document.getElementById('team-search-input');
+      const q = input ? input.value.toLowerCase() : '';
       const filtered = allLeagueTeams.filter(t => (t.displayName && t.displayName.toLowerCase().includes(q)) || (t.name && t.name.toLowerCase().includes(q)) || (t.abbreviation && t.abbreviation.toLowerCase().includes(q)));
       renderTeamsGrid(filtered);
     }
@@ -1576,8 +1593,8 @@
     async function loadTeamDetails(teamId, teamName) {
       const detailSec = document.getElementById('team-detail-section');
       const detailContent = document.getElementById('team-detail-content');
-      detailSec.classList.remove('hidden');
-      detailContent.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-action-blue text-lg"></i> Memuat Data Lengkap Skuad & Hub Tim ${teamName}...`;
+      if(detailSec) detailSec.classList.remove('hidden');
+      if(detailContent) detailContent.innerHTML = `<i class="fa-solid fa-spinner fa-spin text-action-blue text-lg"></i> Memuat Data Lengkap Skuad & Hub Tim ${teamName}...`;
 
       const rosterUrl = `https://site.api.espn.com/apis/site/v2/sports/basketball/${currentLeague}/teams/${teamId}/roster`;
       let athletes = [];
@@ -1622,6 +1639,7 @@
 
     function renderTeamHubDrawer(teamId, teamName, athletes) {
       const detailContent = document.getElementById('team-detail-content');
+      if(!detailContent) return;
 
       let rosterRows = '';
       athletes.forEach(ath => {
@@ -1669,15 +1687,15 @@
     }
 
     function hideTeamDetail() {
-      document.getElementById('team-detail-section').classList.add('hidden');
+      const detailSec = document.getElementById('team-detail-section');
+      if (detailSec) detailSec.classList.add('hidden');
     }
 
     async function fetchLeagueStats() {
       const container = document.getElementById('league-stats-container');
-      const heading = document.getElementById('league-stats-heading');
       const leagueObj = LEAGUE_CATALOG.find(l => l.id === currentLeague);
       
-      if(heading) heading.innerText = `Pemimpin Statistik Liga (${leagueObj?.name || currentLeague})`;
+      safeSetText('league-stats-heading', `Pemimpin Statistik Liga (${leagueObj?.name || currentLeague})`);
       if(!container) return;
       container.innerHTML = `<div class="col-span-full p-6 text-center text-xs text-neutral-muted"><i class="fa-solid fa-spinner fa-spin text-action-blue mr-2"></i>Memuat data statistik pemimpin ${leagueObj?.name}...</div>`;
 
@@ -1699,6 +1717,7 @@
 
     function renderLiveLeagueStats(categories) {
       const container = document.getElementById('league-stats-container');
+      if(!container) return;
       container.innerHTML = '';
 
       categories.forEach(cat => {
@@ -1747,6 +1766,7 @@
 
     function renderFallbackLeagueStats(leagueObj) {
       const container = document.getElementById('league-stats-container');
+      if(!container) return;
       const stats = [
         { category: "Pemimpin Poin (PPG)", key: "ppg", icon: "fa-fire", leader: `Pemain Utama (${leagueObj?.name}) - 28.5 PPG`, team: "Tim Pemimpin", rank: ["1. Pemain #1 - 28.5 PPG", "2. Pemain #2 - 26.2 PPG", "3. Pemain #3 - 25.1 PPG"] },
         { category: "Pemimpin Rebound (RPG)", key: "rpg", icon: "fa-shield-halved", leader: `Big Man (${leagueObj?.name}) - 12.4 RPG`, team: "Tim Pemimpin", rank: ["1. Rebounder #1 - 12.4 RPG", "2. Rebounder #2 - 11.2 RPG", "3. Rebounder #3 - 10.5 RPG"] },
@@ -1835,19 +1855,18 @@
 
     function openPlayerModal(athleteId, athleteName, teamName, pos) {
       const backdrop = document.getElementById('player-modal-backdrop');
-      const nameEl = document.getElementById('player-modal-name');
-      const subEl = document.getElementById('player-modal-sub');
       const bodyEl = document.getElementById('player-modal-body');
-      const avatarEl = document.getElementById('player-modal-avatar');
       
       if(!backdrop) return;
       backdrop.classList.remove('hidden');
 
-      if(nameEl) nameEl.innerText = athleteName || "Detail Pemain";
-      if(subEl) subEl.innerText = `${pos || 'Player'} • ${teamName || 'Basketball'}`;
+      safeSetText('player-modal-name', athleteName || "Detail Pemain");
+      safeSetText('player-modal-sub', `${pos || 'Player'} • ${teamName || 'Basketball'}`);
+      
+      const avatarEl = document.getElementById('player-modal-avatar');
       if(avatarEl) avatarEl.innerHTML = `<img src="https://a.espncdn.com/i/headshots/nba/players/full/${athleteId}.png" class="w-full h-full object-cover" onerror="this.outerHTML='<i class=\\'fa-solid fa-user text-neutral-muted text-xl\\'></i>'">`;
 
-      bodyEl.innerHTML = `<div class="p-6 text-center text-neutral-muted text-xs"><i class="fa-solid fa-spinner fa-spin text-action-blue text-lg mb-2 block"></i>Memuat profil & game log terkini ${athleteName}...</div>`;
+      if(bodyEl) bodyEl.innerHTML = `<div class="p-6 text-center text-neutral-muted text-xs"><i class="fa-solid fa-spinner fa-spin text-action-blue text-lg mb-2 block"></i>Memuat profil & game log terkini ${athleteName}...</div>`;
 
       if(!athleteId) {
         renderFallbackPlayerDetails(athleteName, teamName, pos);
@@ -1875,6 +1894,7 @@
 
     function renderAthleteOverviewData(data, fallbackName, teamName, pos) {
       const bodyEl = document.getElementById('player-modal-body');
+      if(!bodyEl) return;
       const ath = data.athlete || {};
       const stats = data.statistics || {};
 
@@ -1906,6 +1926,7 @@
 
     function renderFallbackPlayerDetails(athleteName, teamName, pos) {
       const bodyEl = document.getElementById('player-modal-body');
+      if(!bodyEl) return;
       bodyEl.innerHTML = `
         <div class="grid grid-cols-3 gap-2 text-center bg-stadium-gray p-3 rounded-xl border border-border-light">
           <div><span class="label-caps block text-[9px]">PPG</span><span class="font-sora font-extrabold text-sm text-action-blue">25.4</span></div>
@@ -2009,10 +2030,10 @@
     function handleAIChatSubmit(e) {
       e.preventDefault();
       const input = document.getElementById('ai-user-input');
-      const text = input.value.trim();
+      const text = input ? input.value.trim() : '';
       if(!text) return;
       askAIQuick(text);
-      input.value = '';
+      if(input) input.value = '';
     }
 
     function generateAIMatchAnalysis() {
